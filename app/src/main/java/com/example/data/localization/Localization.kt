@@ -135,6 +135,9 @@ interface Strings {
     val cancelTransactionPrompt: String
     val cancellationReason: String
     val transactionCancelledSuccess: String
+    val restoreTransaction: String
+    val restoreTransactionPrompt: String
+    val transactionRestoredSuccess: String
     val exportStatementsPdf: String
     val noTransactionsFound: String
     val noTransactionsOfType: String
@@ -212,6 +215,12 @@ interface Strings {
     val noProductsFound: String
     val searchProductHint: String
     val selectProduct: String
+    val editQuantity: String
+    val enterQuantity: String
+    val selectProductImage: String
+    val changeProductImage: String
+    val removeProductImage: String
+    val productImage: String
     val restoreCustomerConfirm: String
     val restoreProductConfirm: String
     val permanentDeleteWarning: String
@@ -460,6 +469,9 @@ object ArabicStrings : Strings {
     override val cancelTransactionPrompt = "هل أنت متأكد من إلغاء هذه المعاملة؟ سيتم التراجع عن تأثيرها المالي مع حفظ سجلها."
     override val cancellationReason = "سبب الإلغاء (اختياري)"
     override val transactionCancelledSuccess = "تم إلغاء المعاملة بنجاح"
+    override val restoreTransaction = "استعادة المعاملة"
+    override val restoreTransactionPrompt = "هل أنت متأكد من استعادة هذه المعاملة؟ سيتم إعادة تأثيرها المالي إلى رصيد الحساب."
+    override val transactionRestoredSuccess = "تمت استعادة المعاملة بنجاح"
     override val exportStatementsPdf = "تصدير كشف PDF"
     override val noTransactionsFound = "لا توجد معاملات"
     override val noTransactionsOfType = "لا توجد معاملات من هذا النوع"
@@ -535,6 +547,12 @@ object ArabicStrings : Strings {
     override val noProductsFound = "لا توجد أصناف مضافة بعد"
     override val searchProductHint = "ابحث عن صنف أو تصنيف..."
     override val selectProduct = "اختر الصنف"
+    override val editQuantity = "تعديل الكمية"
+    override val enterQuantity = "أدخل الكمية المطلوبة"
+    override val selectProductImage = "إضافة صورة للصنف"
+    override val changeProductImage = "تغيير الصورة"
+    override val removeProductImage = "إزالة الصورة"
+    override val productImage = "صورة الصنف"
     override val restoreCustomerConfirm = "استعادة هذا الزبون ليصبح نشطاً مجدداً؟"
     override val restoreProductConfirm = "استعادة هذا الصنف ليتاح للبيع مجدداً؟"
     override val permanentDeleteWarning = "تحذير: سيتم حذف السجل نهائياً. لا يمكن التراجع."
@@ -783,6 +801,9 @@ object EnglishStrings : Strings {
     override val cancelTransactionPrompt = "Are you sure you want to cancel this transaction? Financial impact will be reversed while keeping the record."
     override val cancellationReason = "Reason for cancellation (optional)"
     override val transactionCancelledSuccess = "Transaction cancelled successfully"
+    override val restoreTransaction = "Restore Transaction"
+    override val restoreTransactionPrompt = "Are you sure you want to restore this transaction? Its financial effect will be reapplied to the account balance."
+    override val transactionRestoredSuccess = "Transaction restored successfully"
     override val exportStatementsPdf = "Export PDF Statement"
     override val noTransactionsFound = "No transactions"
     override val noTransactionsOfType = "No transactions of this type"
@@ -858,6 +879,12 @@ object EnglishStrings : Strings {
     override val noProductsFound = "No products added yet"
     override val searchProductHint = "Search product or category..."
     override val selectProduct = "Select Product"
+    override val editQuantity = "Edit Quantity"
+    override val enterQuantity = "Enter required quantity"
+    override val selectProductImage = "Add Product Image"
+    override val changeProductImage = "Change Image"
+    override val removeProductImage = "Remove Image"
+    override val productImage = "Product Image"
     override val restoreCustomerConfirm = "Restore this customer to active status?"
     override val restoreProductConfirm = "Restore this product to active catalog?"
     override val permanentDeleteWarning = "Warning: Record will be permanently removed."

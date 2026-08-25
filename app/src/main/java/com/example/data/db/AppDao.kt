@@ -153,6 +153,12 @@ interface TransactionDao {
         updatedAt: Long = System.currentTimeMillis()
     )
 
+    @Query("UPDATE transactions SET status = 'completed', cancelled_at = NULL, cancel_reason = NULL, updated_at = :updatedAt WHERE id = :id")
+    suspend fun restoreTransaction(
+        id: Long,
+        updatedAt: Long = System.currentTimeMillis()
+    )
+
     @Query("DELETE FROM transactions WHERE id = :id")
     suspend fun deleteTransactionPermanently(id: Long)
 

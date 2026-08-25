@@ -83,6 +83,8 @@ import com.example.core.model.Money
 import com.example.core.model.Product
 import com.example.data.localization.LocalStrings
 import com.example.ui.components.AddEditCustomerDialog
+import com.example.ui.components.EditQuantityDialog
+import com.example.ui.components.ProductImage
 import com.example.ui.theme.BrandBackgroundLight
 import com.example.ui.theme.BrandPrimary
 import com.example.ui.theme.BrandPrimaryContainerLight
@@ -581,6 +583,7 @@ fun ProductGridCard(
     modifier: Modifier = Modifier
 ) {
     val isInCart = currentQuantity > 0.0
+    var showEditQtyDialog by remember { mutableStateOf(false) }
 
     Card(
         modifier = modifier
@@ -599,18 +602,19 @@ fun ProductGridCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(72.dp)
+                    .height(84.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(
                         if (isInCart) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Inventory2,
-                    contentDescription = null,
-                    tint = if (isInCart) BrandPrimary else Color(0xFF9E9E9E),
-                    modifier = Modifier.size(32.dp)
+                ProductImage(
+                    imagePath = product.imagePath,
+                    modifier = Modifier.fillMaxSize(),
+                    placeholderIcon = Icons.Default.Inventory2,
+                    placeholderTint = if (isInCart) BrandPrimary else Color(0xFF9E9E9E),
+                    placeholderBackground = if (isInCart) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
                 )
             }
 
@@ -620,7 +624,7 @@ fun ProductGridCard(
                 text = product.name,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
-                color = Color(0xFF1C1B1F),
+                color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -636,14 +640,14 @@ fun ProductGridCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Quantity Control: [-] qty [+]
+            // Quantity Control: [-] [qty text (tap to edit via keyboard)] [+]
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(36.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(
-                        if (isInCart) BrandPrimaryContainerLight else Color(0xFFF0F0F0)
+                        if (isInCart) BrandPrimaryContainerLight else MaterialTheme.colorScheme.surfaceVariant
                     ),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -667,17 +671,25 @@ fun ProductGridCard(
                     )
                 }
 
-                Text(
-                    text = if (currentQuantity % 1.0 == 0.0) {
-                        currentQuantity.toInt().toString()
-                    } else {
-                        currentQuantity.toString()
-                    },
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 14.sp,
-                    color = if (isInCart) BrandPrimary else Color.DarkGray,
-                    modifier = Modifier.testTag("product_qty_text_${product.id}")
-                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { showEditQtyDialog = true }
+                        .padding(horizontal = 4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (currentQuantity % 1.0 == 0.0) {
+                            currentQuantity.toInt().toString()
+                        } else {
+                            currentQuantity.toString()
+                        },
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 14.sp,
+                        color = if (isInCart) BrandPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.testTag("product_qty_text_${product.id}")
+                    )
+                }
 
                 IconButton(
                     onClick = { onQuantityChanged(currentQuantity + 1.0) },
@@ -694,6 +706,18 @@ fun ProductGridCard(
                 }
             }
         }
+    }
+
+    if (showEditQtyDialog) {
+        EditQuantityDialog(
+            initialQuantity = currentQuantity,
+            productName = product.name,
+            onDismiss = { showEditQtyDialog = false },
+            onConfirm = { newQty ->
+                onQuantityChanged(newQty)
+                showEditQtyDialog = false
+            }
+        )
     }
 }
 

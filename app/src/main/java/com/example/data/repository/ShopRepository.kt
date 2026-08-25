@@ -361,6 +361,22 @@ class ShopRepository(private val database: AppDatabase) : IShopRepository {
         )
     }
 
+    override suspend fun restoreTransaction(
+        transactionId: Long
+    ): Result<Unit> = runCatching {
+        val tx = transactionDao.getTransactionById(transactionId)
+            ?: throw IllegalStateException("Transaction with ID $transactionId does not exist.")
+
+        if (tx.status != TransactionStatus.CANCELLED) {
+            throw IllegalStateException("Transaction is not cancelled.")
+        }
+
+        transactionDao.restoreTransaction(
+            id = transactionId,
+            updatedAt = System.currentTimeMillis()
+        )
+    }
+
     override suspend fun permanentDeleteTransaction(id: Long): Result<Unit> = runCatching {
         database.withTransaction {
             transactionDao.deleteItemsForTransaction(id)

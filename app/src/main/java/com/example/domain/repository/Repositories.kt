@@ -86,6 +86,13 @@ interface TransactionRepository {
         reason: String
     ): Result<Unit>
 
+    /**
+     * Restores a previously cancelled transaction back to COMPLETED status.
+     */
+    suspend fun restoreTransaction(
+        transactionId: Long
+    ): Result<Unit>
+
     suspend fun permanentDeleteTransaction(id: Long): Result<Unit>
 }
 

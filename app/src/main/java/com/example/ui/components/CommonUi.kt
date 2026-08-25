@@ -48,6 +48,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import android.content.Context
+import android.graphics.BitmapFactory
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.filled.Restore
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import java.io.File
+import java.io.FileOutputStream
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
@@ -615,17 +633,102 @@ fun AddEditCustomerDialog(
     )
 }
 
-// Add/Edit Product Dialog
+/**
+ * Decodes and displays a product image from local internal storage.
+ * If imagePath is null or cannot be read, falls back to a clean placeholder icon.
+ */
+@Composable
+fun ProductImage(
+    imagePath: String?,
+    modifier: Modifier = Modifier,
+    contentDescription: String? = null,
+    placeholderIcon: ImageVector = Icons.Default.Inventory2,
+    placeholderTint: Color = BrandPrimary,
+    placeholderBackground: Color = BrandPrimaryContainerLight
+) {
+    val bitmap = remember(imagePath) {
+        if (!imagePath.isNullOrBlank()) {
+            try {
+                val file = File(imagePath)
+                if (file.exists()) {
+                    BitmapFactory.decodeFile(file.absolutePath)?.asImageBitmap()
+                } else null
+            } catch (e: Exception) {
+                null
+            }
+        } else null
+    }
+
+    if (bitmap != null) {
+        Image(
+            bitmap = bitmap,
+            contentDescription = contentDescription,
+            modifier = modifier,
+            contentScale = ContentScale.Crop
+        )
+    } else {
+        Box(
+            modifier = modifier.background(placeholderBackground),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = placeholderIcon,
+                contentDescription = contentDescription,
+                tint = placeholderTint,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+    }
+}
+
+/**
+ * Copies picked image from content URI into private app files directory.
+ */
+fun saveImageLocally(context: Context, uri: Uri): String? {
+    return try {
+        val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+        val imagesDir = File(context.filesDir, "product_images")
+        if (!imagesDir.exists()) {
+            imagesDir.mkdirs()
+        }
+        val fileName = "product_${System.currentTimeMillis()}.jpg"
+        val file = File(imagesDir, fileName)
+        val outputStream = FileOutputStream(file)
+        inputStream.use { input ->
+            outputStream.use { output ->
+                input.copyTo(output)
+            }
+        }
+        file.absolutePath
+    } catch (e: Exception) {
+        null
+    }
+}
+
+// Add/Edit Product Dialog with Image Picker
 @Composable
 fun AddEditProductDialog(
     product: Product? = null,
     onDismiss: () -> Unit,
     onSave: (Product) -> Unit
 ) {
+    val context = LocalContext.current
     val strings = LocalStrings.current
     var name by remember { mutableStateOf(product?.name ?: "") }
     var priceText by remember { mutableStateOf(if (product != null) product.price.formatWithoutSymbol() else "") }
+    var imagePath by remember { mutableStateOf(product?.imagePath) }
     var nameError by remember { mutableStateOf(false) }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            val localSavedPath = saveImageLocally(context, uri)
+            if (localSavedPath != null) {
+                imagePath = localSavedPath
+            }
+        }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -638,7 +741,77 @@ fun AddEditProductDialog(
             )
         },
         text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Product Image Preview and Selection
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+                        .clickable { imagePickerLauncher.launch("image/*") },
+                    contentAlignment = Alignment.Center
+                ) {
+                    ProductImage(
+                        imagePath = imagePath,
+                        modifier = Modifier.size(100.dp),
+                        contentDescription = strings.productImage
+                    )
+
+                    // Overlay icon/badge for adding/changing image
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(4.dp)
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = if (imagePath.isNullOrBlank()) Icons.Default.AddPhotoAlternate else Icons.Default.Edit,
+                            contentDescription = strings.selectProductImage,
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.padding(top = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(
+                        onClick = { imagePickerLauncher.launch("image/*") },
+                        modifier = Modifier.testTag("btn_pick_product_image")
+                    ) {
+                        Text(
+                            text = if (imagePath.isNullOrBlank()) strings.selectProductImage else strings.changeProductImage,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    if (!imagePath.isNullOrBlank()) {
+                        TextButton(
+                            onClick = { imagePath = null },
+                            modifier = Modifier.testTag("btn_remove_product_image")
+                        ) {
+                            Text(
+                                text = strings.removeProductImage,
+                                fontSize = 12.sp,
+                                color = FinancialDebt,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
                 OutlinedTextField(
                     value = name,
                     onValueChange = {
@@ -679,10 +852,12 @@ fun AddEditProductDialog(
                     val money = Money.fromShekels(priceText)
                     val updated = product?.copy(
                         name = name.trim(),
-                        price = money
+                        price = money,
+                        imagePath = imagePath
                     ) ?: Product(
                         name = name.trim(),
-                        price = money
+                        price = money,
+                        imagePath = imagePath
                     )
                     onSave(updated)
                 },
@@ -691,6 +866,147 @@ fun AddEditProductDialog(
                 modifier = Modifier.testTag("save_product_btn")
             ) {
                 Text(strings.save, fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            OutlinedButton(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text(strings.cancel)
+            }
+        },
+        shape = RoundedCornerShape(20.dp),
+        containerColor = MaterialTheme.colorScheme.surface
+    )
+}
+
+// Direct numeric input dialog to edit quantity via keyboard
+@Composable
+fun EditQuantityDialog(
+    initialQuantity: Double,
+    productName: String? = null,
+    onDismiss: () -> Unit,
+    onConfirm: (Double) -> Unit
+) {
+    val strings = LocalStrings.current
+    var qtyText by remember {
+        mutableStateOf(
+            if (initialQuantity <= 0.0) ""
+            else if (initialQuantity % 1.0 == 0.0) initialQuantity.toInt().toString()
+            else initialQuantity.toString()
+        )
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = strings.editQuantity,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 16.sp
+            )
+        },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                if (!productName.isNullOrBlank()) {
+                    Text(
+                        text = productName,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                Text(
+                    text = strings.enterQuantity,
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                OutlinedTextField(
+                    value = qtyText,
+                    onValueChange = { qtyText = it },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("quantity_input_field"),
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true,
+                    placeholder = { Text("0") }
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val parsed = qtyText.toDoubleOrNull() ?: 0.0
+                    onConfirm(if (parsed < 0.0) 0.0 else parsed)
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier.testTag("confirm_qty_btn")
+            ) {
+                Text(strings.confirm, fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            OutlinedButton(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text(strings.cancel)
+            }
+        },
+        shape = RoundedCornerShape(20.dp),
+        containerColor = MaterialTheme.colorScheme.surface
+    )
+}
+
+// Restore Transaction Dialog
+@Composable
+fun RestoreTransactionDialog(
+    transactionId: Long,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    val strings = LocalStrings.current
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Restore,
+                    contentDescription = null,
+                    tint = BrandSecondary,
+                    modifier = Modifier.size(22.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = strings.restoreTransaction,
+                    fontWeight = FontWeight.Bold,
+                    color = BrandSecondary,
+                    fontSize = 16.sp
+                )
+            }
+        },
+        text = {
+            Text(
+                text = strings.restoreTransactionPrompt,
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(containerColor = BrandSecondary),
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier.testTag("confirm_restore_tx_btn")
+            ) {
+                Text(strings.confirm, fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {

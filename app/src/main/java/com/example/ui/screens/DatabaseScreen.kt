@@ -75,6 +75,7 @@ import com.example.data.localization.LocalStrings
 import com.example.ui.components.AddEditCustomerDialog
 import com.example.ui.components.AddEditProductDialog
 import com.example.ui.components.AppHeader
+import com.example.ui.components.ProductImage
 import com.example.ui.components.SearchBar
 import com.example.ui.components.StatusBadge
 import com.example.ui.theme.BrandBackgroundLight
@@ -934,21 +935,14 @@ fun ProductDatabaseCard(
                 modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Product Icon / Avatar
-                Box(
+                // Product Icon / Avatar / Custom Image
+                ProductImage(
+                    imagePath = product.imagePath,
                     modifier = Modifier
-                        .size(42.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(BrandPrimaryContainerLight),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Inventory2,
-                        contentDescription = null,
-                        tint = BrandPrimary,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
+                        .size(46.dp)
+                        .clip(RoundedCornerShape(10.dp)),
+                    contentDescription = product.name
+                )
 
                 Spacer(modifier = Modifier.width(12.dp))
 

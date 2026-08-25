@@ -135,21 +135,6 @@ fun HomeScreen(
                                         maxLines = 1
                                     )
                                 }
-
-                                IconButton(
-                                    onClick = { showAddCustomerDialog = true },
-                                    modifier = Modifier
-                                        .size(42.dp)
-                                        .clip(CircleShape)
-                                        .background(Color.White.copy(alpha = 0.18f))
-                                        .testTag("home_add_customer_header_btn")
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Add,
-                                        contentDescription = strings.addCustomer,
-                                        tint = Color.White
-                                    )
-                                }
                             }
 
                             Spacer(modifier = Modifier.height(14.dp))
@@ -228,25 +213,6 @@ fun HomeScreen(
                     )
                 }
             }
-        }
-
-        // Floating Action Button for fast customer creation
-        FloatingActionButton(
-            onClick = { showAddCustomerDialog = true },
-            containerColor = BrandPrimary,
-            contentColor = Color.White,
-            shape = CircleShape,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 85.dp, end = 20.dp)
-                .size(56.dp)
-                .testTag("home_fab_add_customer")
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = strings.addCustomer,
-                modifier = Modifier.size(28.dp)
-            )
         }
     }
 

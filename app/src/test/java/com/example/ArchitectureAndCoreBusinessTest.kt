@@ -204,4 +204,38 @@ class ArchitectureAndCoreBusinessTest {
         // Empty cart is invalid
         assertFalse(TransactionValidator.validateCashPurchase(emptyList()).isValid)
     }
+
+    @Test
+    fun testTransactionRestorationReappliesDebt() {
+        val txCancelled = Transaction(
+            id = 101,
+            customerId = 5,
+            type = TransactionType.CREDIT_PURCHASE,
+            totalAmount = Money.fromShekels(150.0),
+            status = TransactionStatus.CANCELLED,
+            cancelReason = "Entered by mistake"
+        )
+        // When cancelled, debt is 0
+        assertEquals(0L, DebtEngine.calculateOutstandingDebt(listOf(txCancelled)).minorUnits)
+
+        // When restored back to COMPLETED, debt is restored to 150.0
+        val txRestored = txCancelled.copy(
+            status = TransactionStatus.COMPLETED,
+            cancelReason = null,
+            cancelledAt = null
+        )
+        assertEquals(15000L, DebtEngine.calculateOutstandingDebt(listOf(txRestored)).minorUnits)
+    }
+
+    @Test
+    fun testProductWithImageModelIntegrity() {
+        val productWithImage = Product(
+            id = 1,
+            name = "حليب رغيد",
+            price = Money.fromShekels(4.5),
+            imagePath = "/data/user/0/com.example/files/product_images/product_123.jpg"
+        )
+        assertTrue(ProductValidator.validate(productWithImage).isValid)
+        assertEquals("/data/user/0/com.example/files/product_images/product_123.jpg", productWithImage.imagePath)
+    }
 }

@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
@@ -79,6 +80,7 @@ import com.example.data.localization.formatDateTime
 import com.example.data.localization.formatTimeOnly
 import com.example.ui.components.AppHeader
 import com.example.ui.components.CancelTransactionDialog
+import com.example.ui.components.RestoreTransactionDialog
 import com.example.ui.components.StatusBadge
 import com.example.ui.theme.BrandBackgroundLight
 import com.example.ui.theme.BrandPrimary
@@ -109,6 +111,7 @@ fun StatementsScreen(
     val allActiveCustomersWithDebt by viewModel.activeCustomersWithDebt.collectAsStateWithLifecycle()
 
     var cancelTargetTxId by remember { mutableStateOf<Long?>(null) }
+    var restoreTargetTxId by remember { mutableStateOf<Long?>(null) }
     var selectedDetailsTx by remember { mutableStateOf<TransactionWithDetails?>(null) }
     var isCustomerDropdownExpanded by remember { mutableStateOf(false) }
 
@@ -614,6 +617,11 @@ fun StatementsScreen(
                 selectedDetailsTx = null
                 cancelTargetTxId = txId
             },
+            onRestoreTransaction = {
+                val txId = txDetails.transaction.id
+                selectedDetailsTx = null
+                restoreTargetTxId = txId
+            },
             onCustomerClick = { customerId ->
                 selectedDetailsTx = null
                 viewModel.openCustomerDetails(customerId)
@@ -629,6 +637,19 @@ fun StatementsScreen(
             onConfirm = { reason ->
                 viewModel.cancelTransaction(txId, reason) {
                     cancelTargetTxId = null
+                }
+            }
+        )
+    }
+
+    // Restore Transaction Dialog
+    restoreTargetTxId?.let { txId ->
+        RestoreTransactionDialog(
+            transactionId = txId,
+            onDismiss = { restoreTargetTxId = null },
+            onConfirm = {
+                viewModel.restoreTransaction(txId) {
+                    restoreTargetTxId = null
                 }
             }
         )
@@ -877,6 +898,7 @@ fun TransactionDetailsBottomSheet(
     txDetails: TransactionWithDetails,
     onDismiss: () -> Unit,
     onCancelTransaction: () -> Unit,
+    onRestoreTransaction: () -> Unit,
     onCustomerClick: (Long) -> Unit
 ) {
     val strings = LocalStrings.current
@@ -1123,6 +1145,30 @@ fun TransactionDetailsBottomSheet(
                     Text(
                         text = strings.cancelTransaction,
                         color = FinancialDebt,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            } else {
+                Button(
+                    onClick = onRestoreTransaction,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("btn_sheet_restore_tx"),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = BrandPrimaryContainerLight)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Restore,
+                        contentDescription = null,
+                        tint = BrandPrimary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = strings.restoreTransaction,
+                        color = BrandPrimary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
                     )

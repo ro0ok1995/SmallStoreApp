@@ -549,7 +549,7 @@ class ShopViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Transaction cancellation
+    // Transaction cancellation & restoration
     fun cancelTransaction(transactionId: Long, reason: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -563,6 +563,25 @@ class ShopViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } catch (e: Exception) {
                 _uiEvents.emit(e.message ?: "Cancellation error")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun restoreTransaction(transactionId: Long, onSuccess: () -> Unit = {}) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val result = repository.restoreTransaction(transactionId)
+                result.onSuccess {
+                    _uiEvents.emit(if (_currentLanguage.value == AppLanguage.ARABIC) "تمت استعادة المعاملة بنجاح وتحديث الرصيد." else "Transaction restored successfully.")
+                    onSuccess()
+                }.onFailure { err ->
+                    _uiEvents.emit(err.message ?: "Restoration error")
+                }
+            } catch (e: Exception) {
+                _uiEvents.emit(e.message ?: "Restoration error")
             } finally {
                 _isLoading.value = false
             }

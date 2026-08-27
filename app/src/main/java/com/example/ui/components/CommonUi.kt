@@ -86,10 +86,7 @@ import com.example.core.model.Money
 import com.example.core.validation.PhoneValidator
 import com.example.core.model.Product
 import com.example.data.localization.LocalStrings
-import com.example.ui.theme.BrandBackgroundLight
-import com.example.ui.theme.BrandPrimary
-import com.example.ui.theme.BrandPrimaryContainerLight
-import com.example.ui.theme.BrandSecondary
+import com.example.ui.theme.LocalAppThemeColors
 import com.example.ui.theme.FinancialDebt
 import com.example.ui.theme.FinancialDebtContainer
 import com.example.ui.theme.FinancialPayment
@@ -103,10 +100,9 @@ fun AppHeader(
     actions: @Composable (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = BrandPrimary,
-        contentColor = Color.White
+    val themeColors = LocalAppThemeColors.current
+    ThemedHeaderBox(
+        modifier = modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -149,7 +145,7 @@ fun AppHeader(
                         Text(
                             text = subtitle,
                             style = MaterialTheme.typography.bodySmall.copy(
-                                color = Color.White.copy(alpha = 0.8f),
+                                color = Color.White.copy(alpha = 0.82f),
                                 fontSize = 12.sp
                             ),
                             maxLines = 1
@@ -190,7 +186,7 @@ fun SearchBar(
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search",
-                tint = BrandPrimary,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp)
             )
         },
@@ -310,7 +306,7 @@ fun RecordPaymentDialog(
             Text(
                 text = strings.recordPaymentTitle,
                 fontWeight = FontWeight.Bold,
-                color = BrandPrimary,
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 16.sp
             )
         },
@@ -390,7 +386,7 @@ fun RecordPaymentDialog(
                         Text(
                             text = strings.payFullDebt,
                             fontSize = 12.sp,
-                            color = BrandPrimary,
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -643,8 +639,8 @@ fun ProductImage(
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
     placeholderIcon: ImageVector = Icons.Default.Inventory2,
-    placeholderTint: Color = BrandPrimary,
-    placeholderBackground: Color = BrandPrimaryContainerLight
+    placeholderTint: Color = MaterialTheme.colorScheme.primary,
+    placeholderBackground: Color = MaterialTheme.colorScheme.primaryContainer
 ) {
     val bitmap = remember(imagePath) {
         if (!imagePath.isNullOrBlank()) {
@@ -980,14 +976,14 @@ fun RestoreTransactionDialog(
                 Icon(
                     imageVector = Icons.Default.Restore,
                     contentDescription = null,
-                    tint = BrandSecondary,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(22.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = strings.restoreTransaction,
                     fontWeight = FontWeight.Bold,
-                    color = BrandSecondary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 16.sp
                 )
             }
@@ -1002,7 +998,7 @@ fun RestoreTransactionDialog(
         confirmButton = {
             Button(
                 onClick = onConfirm,
-                colors = ButtonDefaults.buttonColors(containerColor = BrandSecondary),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.testTag("confirm_restore_tx_btn")
             ) {
@@ -1038,7 +1034,7 @@ fun CancelTransactionDialog(
             Text(
                 text = strings.cancelTransaction,
                 fontWeight = FontWeight.Bold,
-                color = Color.Red,
+                color = FinancialDebt,
                 fontSize = 16.sp
             )
         },
@@ -1065,7 +1061,7 @@ fun CancelTransactionDialog(
         confirmButton = {
             Button(
                 onClick = { onConfirm(reason) },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                colors = ButtonDefaults.buttonColors(containerColor = FinancialDebt),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.testTag("confirm_cancel_btn")
             ) {

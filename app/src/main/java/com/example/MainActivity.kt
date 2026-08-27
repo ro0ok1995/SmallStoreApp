@@ -57,6 +57,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val currentLanguage by viewModel.currentLanguage.collectAsStateWithLifecycle()
+            val currentVisualTheme by viewModel.currentVisualTheme.collectAsStateWithLifecycle()
             val shopSettings by viewModel.shopSettings.collectAsStateWithLifecycle()
             val strings = if (currentLanguage == AppLanguage.ARABIC) ArabicStrings else EnglishStrings
             val layoutDirection = if (currentLanguage == AppLanguage.ARABIC) LayoutDirection.Rtl else LayoutDirection.Ltr
@@ -73,7 +74,10 @@ class MainActivity : ComponentActivity() {
                 LocalStrings provides strings,
                 LocalLayoutDirection provides layoutDirection
             ) {
-                MyApplicationTheme(darkTheme = isDark) {
+                MyApplicationTheme(
+                    visualTheme = currentVisualTheme,
+                    darkTheme = isDark
+                ) {
                     MainAppContent(viewModel = viewModel)
                 }
             }

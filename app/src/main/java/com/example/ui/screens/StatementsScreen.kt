@@ -82,10 +82,7 @@ import com.example.ui.components.AppHeader
 import com.example.ui.components.CancelTransactionDialog
 import com.example.ui.components.RestoreTransactionDialog
 import com.example.ui.components.StatusBadge
-import com.example.ui.theme.BrandBackgroundLight
-import com.example.ui.theme.BrandPrimary
-import com.example.ui.theme.BrandPrimaryContainerLight
-import com.example.ui.theme.BrandSecondary
+import com.example.ui.theme.LocalAppThemeColors
 import com.example.ui.theme.FinancialCancelled
 import com.example.ui.theme.FinancialCancelledContainer
 import com.example.ui.theme.FinancialCash
@@ -103,6 +100,7 @@ fun StatementsScreen(
     modifier: Modifier = Modifier
 ) {
     val strings = LocalStrings.current
+    val themeColors = LocalAppThemeColors.current
     val transactionsWithDetails by viewModel.filteredTransactionsWithDetails.collectAsStateWithLifecycle()
     val searchQuery by viewModel.statementSearchQuery.collectAsStateWithLifecycle()
     val selectedTypeFilter by viewModel.selectedTxTypeFilter.collectAsStateWithLifecycle()
@@ -189,7 +187,7 @@ fun StatementsScreen(
                                             strings.searchCustomerStatementPlaceholder
                                         },
                                         fontSize = 14.sp,
-                                        color = if (selectedCustomer != null) BrandPrimary else Color.Gray,
+                                        color = if (selectedCustomer != null) themeColors.primary else Color.Gray,
                                         fontWeight = if (selectedCustomer != null) FontWeight.Bold else FontWeight.Normal
                                     )
                                 },
@@ -197,7 +195,7 @@ fun StatementsScreen(
                                     Icon(
                                         imageVector = if (selectedCustomer != null) Icons.Default.Person else Icons.Default.Search,
                                         contentDescription = null,
-                                        tint = if (selectedCustomer != null) BrandPrimary else Color.Gray
+                                        tint = if (selectedCustomer != null) themeColors.primary else Color.Gray
                                     )
                                 },
                                 trailingIcon = {
@@ -226,7 +224,7 @@ fun StatementsScreen(
                                             Icon(
                                                 imageVector = Icons.Default.ArrowDropDown,
                                                 contentDescription = "Select customer",
-                                                tint = BrandPrimary
+                                                tint = themeColors.primary
                                             )
                                         }
                                     }
@@ -254,7 +252,7 @@ fun StatementsScreen(
                                         Text(
                                             text = "👥 ${strings.allCustomersMode}",
                                             fontWeight = FontWeight.Bold,
-                                            color = BrandPrimary,
+                                            color = themeColors.primary,
                                             fontSize = 14.sp
                                         )
                                     },
@@ -348,7 +346,7 @@ fun StatementsScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = BrandPrimaryContainerLight,
+                                color = themeColors.primaryContainer,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Row(
@@ -363,7 +361,7 @@ fun StatementsScreen(
                                             modifier = Modifier
                                                 .size(32.dp)
                                                 .clip(CircleShape)
-                                                .background(BrandPrimary),
+                                                .background(themeColors.primary),
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Icon(
@@ -379,7 +377,7 @@ fun StatementsScreen(
                                                 text = selectedCustomer!!.name,
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 14.sp,
-                                                color = BrandPrimary
+                                                color = themeColors.primary
                                             )
                                             if (selectedCustomer!!.phone.isNotBlank()) {
                                                 Text(
@@ -402,7 +400,7 @@ fun StatementsScreen(
                                             text = strings.clearCustomerFilter,
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = BrandPrimary
+                                            color = themeColors.primary
                                         )
                                     }
                                 }
@@ -434,13 +432,13 @@ fun StatementsScreen(
                                 testTag = "summary_card_debt"
                             )
 
-                            // Card 2: Total Purchases (Dark Purple)
+                            // Card 2: Total Purchases
                             FinancialMetricCard(
                                 title = strings.totalPurchases,
                                 amount = financialMetrics.totalPurchases.format(),
                                 countText = "${financialMetrics.completedCreditPurchasesCount} ${strings.creditPurchase}",
-                                color = BrandSecondary,
-                                containerColor = BrandPrimaryContainerLight,
+                                color = themeColors.primary,
+                                containerColor = themeColors.primaryContainer,
                                 icon = Icons.Default.CreditCard,
                                 modifier = Modifier.weight(1f),
                                 testTag = "summary_card_purchases"
@@ -478,7 +476,7 @@ fun StatementsScreen(
                                 text = strings.transactionHistory,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 15.sp,
-                                color = BrandPrimary
+                                color = themeColors.primary
                             )
                             Text(
                                 text = "${transactionsWithDetails.size} ${strings.details}",
@@ -500,7 +498,7 @@ fun StatementsScreen(
                                     onClick = { viewModel.setSelectedTxTypeFilter(null) },
                                     label = { Text(strings.all, fontSize = 12.sp, fontWeight = FontWeight.SemiBold) },
                                     colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = BrandPrimary,
+                                        selectedContainerColor = themeColors.primary,
                                         selectedLabelColor = Color.White
                                     ),
                                     modifier = Modifier.testTag("filter_chip_all")
@@ -833,7 +831,7 @@ fun StatementTransactionCard(
                                 text = item.customer.name,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 13.sp,
-                                color = BrandPrimary,
+                                color = LocalAppThemeColors.current.primary,
                                 modifier = Modifier
                                     .clickable { onCustomerClick() }
                                     .padding(top = 2.dp)
@@ -880,7 +878,7 @@ fun StatementTransactionCard(
                             text = strings.moreDetails,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = BrandPrimary
+                            color = LocalAppThemeColors.current.primary
                         )
                     }
                 }
@@ -902,6 +900,7 @@ fun TransactionDetailsBottomSheet(
     onCustomerClick: (Long) -> Unit
 ) {
     val strings = LocalStrings.current
+    val themeColors = LocalAppThemeColors.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val isCancelled = txDetails.transaction.status == TransactionStatus.CANCELLED
 
@@ -954,13 +953,13 @@ fun TransactionDetailsBottomSheet(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(if (isCancelled) FinancialCancelledContainer else Color(0xFFF0E5F1)),
+                            .background(if (isCancelled) FinancialCancelledContainer else themeColors.primaryContainer.copy(alpha = 0.5f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = icon,
                             contentDescription = null,
-                            tint = if (isCancelled) FinancialCancelled else BrandPrimary,
+                            tint = if (isCancelled) FinancialCancelled else themeColors.primary,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -969,7 +968,7 @@ fun TransactionDetailsBottomSheet(
                         text = strings.transactionDetailsTitle,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
-                        color = BrandPrimary
+                        color = themeColors.primary
                     )
                 }
 
@@ -981,13 +980,13 @@ fun TransactionDetailsBottomSheet(
                 }
             }
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color(0xFFEEEEEE))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
 
             // Primary Total Card
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                color = if (isCancelled) FinancialCancelledContainer.copy(alpha = 0.4f) else Color(0xFFF9F7FA)
+                color = if (isCancelled) FinancialCancelledContainer.copy(alpha = 0.4f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
             ) {
                 Column(
                     modifier = Modifier
@@ -1024,7 +1023,7 @@ fun TransactionDetailsBottomSheet(
                 DetailInfoRow(
                     label = strings.customerLabel,
                     value = txDetails.customer.name,
-                    valueColor = BrandPrimary,
+                    valueColor = themeColors.primary,
                     isClickable = true,
                     onClick = { onCustomerClick(txDetails.customer.id) }
                 )
@@ -1085,14 +1084,14 @@ fun TransactionDetailsBottomSheet(
                     text = strings.orderItems,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    color = BrandPrimary
+                    color = themeColors.primary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFFF9F7FA)
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         txDetails.items.forEachIndexed { index, item ->
@@ -1105,18 +1104,18 @@ fun TransactionDetailsBottomSheet(
                                 Text(
                                     text = "${item.productNameSnapshot} × ${item.quantity}",
                                     fontSize = 13.sp,
-                                    color = Color.DarkGray,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontWeight = FontWeight.Medium
                                 )
                                 Text(
                                     text = item.subtotal.format(),
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.Black
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                             }
                             if (index < txDetails.items.size - 1) {
-                                HorizontalDivider(color = Color(0xFFEFEFEF), modifier = Modifier.padding(vertical = 2.dp))
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f), modifier = Modifier.padding(vertical = 2.dp))
                             }
                         }
                     }
@@ -1157,18 +1156,18 @@ fun TransactionDetailsBottomSheet(
                         .fillMaxWidth()
                         .testTag("btn_sheet_restore_tx"),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = BrandPrimaryContainerLight)
+                    colors = ButtonDefaults.buttonColors(containerColor = themeColors.primaryContainer)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Restore,
                         contentDescription = null,
-                        tint = BrandPrimary,
+                        tint = themeColors.primary,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = strings.restoreTransaction,
-                        color = BrandPrimary,
+                        color = themeColors.primary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
                     )

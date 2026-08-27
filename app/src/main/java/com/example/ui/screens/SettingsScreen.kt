@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.BrightnessAuto
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Description
@@ -84,6 +85,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -99,14 +101,12 @@ import com.example.data.localization.LocalAppLanguage
 import com.example.data.localization.LocalStrings
 import com.example.ui.components.AppHeader
 import com.example.ui.components.StatusBadge
-import com.example.ui.theme.BrandBackgroundLight
-import com.example.ui.theme.BrandPrimary
-import com.example.ui.theme.BrandPrimaryContainerLight
-import com.example.ui.theme.BrandSecondary
 import com.example.ui.theme.FinancialDebt
 import com.example.ui.theme.FinancialDebtContainer
 import com.example.ui.theme.FinancialPayment
 import com.example.ui.theme.FinancialPaymentContainer
+import com.example.ui.theme.AppVisualTheme
+import com.example.ui.theme.LocalAppThemeColors
 import com.example.ui.viewmodel.ShopViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -312,6 +312,7 @@ fun SettingsGridTabButton(
 fun AccountTabContent(viewModel: ShopViewModel) {
     val strings = LocalStrings.current
     val settings by viewModel.shopSettings.collectAsStateWithLifecycle()
+    val themeColors = LocalAppThemeColors.current
 
     var storeName by remember(settings.storeName) { mutableStateOf(settings.storeName) }
     var ownerName by remember(settings.ownerName) { mutableStateOf(settings.ownerName) }
@@ -330,7 +331,7 @@ fun AccountTabContent(viewModel: ShopViewModel) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(14.dp),
-            colors = CardDefaults.cardColors(containerColor = BrandPrimaryContainerLight)
+            colors = CardDefaults.cardColors(containerColor = themeColors.primaryContainer.copy(alpha = 0.45f))
         ) {
             Row(
                 modifier = Modifier.padding(14.dp),
@@ -339,14 +340,14 @@ fun AccountTabContent(viewModel: ShopViewModel) {
                 Icon(
                     imageVector = Icons.Default.Info,
                     contentDescription = null,
-                    tint = BrandPrimary,
+                    tint = themeColors.primary,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     text = strings.storeDetailsInfoNotice,
                     fontSize = 12.sp,
-                    color = BrandPrimary,
+                    color = themeColors.primary,
                     lineHeight = 17.sp
                 )
             }
@@ -439,7 +440,7 @@ fun AccountTabContent(viewModel: ShopViewModel) {
                         .fillMaxWidth()
                         .height(48.dp)
                         .testTag("save_store_details_btn"),
-                    colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
+                    colors = ButtonDefaults.buttonColors(containerColor = themeColors.primary),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Icon(
@@ -465,6 +466,7 @@ fun AccountTabContent(viewModel: ShopViewModel) {
 @Composable
 fun DataTabContent(viewModel: ShopViewModel) {
     val strings = LocalStrings.current
+    val themeColors = LocalAppThemeColors.current
 
     var pendingRestorePayload by remember { mutableStateOf<BackupPayload?>(null) }
     var showResetConfirmationDialog by remember { mutableStateOf(false) }
@@ -510,13 +512,13 @@ fun DataTabContent(viewModel: ShopViewModel) {
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(BrandPrimaryContainerLight),
+                            .background(themeColors.primaryContainer),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Backup,
                             contentDescription = null,
-                            tint = BrandPrimary,
+                            tint = themeColors.primary,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -542,7 +544,7 @@ fun DataTabContent(viewModel: ShopViewModel) {
                         .fillMaxWidth()
                         .height(46.dp)
                         .testTag("create_backup_btn"),
-                    colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
+                    colors = ButtonDefaults.buttonColors(containerColor = themeColors.primary),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Icon(
@@ -618,14 +620,14 @@ fun DataTabContent(viewModel: ShopViewModel) {
                     Icon(
                         imageVector = Icons.Default.UploadFile,
                         contentDescription = null,
-                        tint = BrandPrimary,
+                        tint = themeColors.primary,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = strings.restoreBackupButton,
                         fontWeight = FontWeight.Bold,
-                        color = BrandPrimary,
+                        color = themeColors.primary,
                         fontSize = 14.sp
                     )
                 }
@@ -721,7 +723,7 @@ fun DataTabContent(viewModel: ShopViewModel) {
                 Icon(
                     imageVector = Icons.Default.Restore,
                     contentDescription = null,
-                    tint = BrandPrimary,
+                    tint = themeColors.primary,
                     modifier = Modifier.size(36.dp)
                 )
             },
@@ -730,7 +732,7 @@ fun DataTabContent(viewModel: ShopViewModel) {
                     text = strings.confirmRestoreTitle,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = BrandPrimary
+                    color = themeColors.primary
                 )
             },
             text = {
@@ -746,7 +748,7 @@ fun DataTabContent(viewModel: ShopViewModel) {
 
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        color = BrandBackgroundLight,
+                        color = themeColors.primaryContainer.copy(alpha = 0.35f),
                         shape = RoundedCornerShape(10.dp)
                     ) {
                         Column(
@@ -793,7 +795,7 @@ fun DataTabContent(viewModel: ShopViewModel) {
                             onSuccess = { pendingRestorePayload = null }
                         )
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
+                    colors = ButtonDefaults.buttonColors(containerColor = themeColors.primary),
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Text(strings.confirmAndRestore, fontWeight = FontWeight.Bold)
@@ -876,6 +878,7 @@ fun ArchiveTabContent(viewModel: ShopViewModel) {
     val strings = LocalStrings.current
     val currentLang = LocalAppLanguage.current
     val isArabic = currentLang == AppLanguage.ARABIC
+    val themeColors = LocalAppThemeColors.current
 
     var activeSubSection by remember { mutableStateOf(ArchiveSubSection.CUSTOMERS) }
 
@@ -914,7 +917,7 @@ fun ArchiveTabContent(viewModel: ShopViewModel) {
                     .height(38.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .clickable { activeSubSection = ArchiveSubSection.CUSTOMERS },
-                color = if (activeSubSection == ArchiveSubSection.CUSTOMERS) BrandPrimary else Color.Transparent,
+                color = if (activeSubSection == ArchiveSubSection.CUSTOMERS) themeColors.primary else Color.Transparent,
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -933,7 +936,7 @@ fun ArchiveTabContent(viewModel: ShopViewModel) {
                     .height(38.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .clickable { activeSubSection = ArchiveSubSection.PRODUCTS },
-                color = if (activeSubSection == ArchiveSubSection.PRODUCTS) BrandPrimary else Color.Transparent,
+                color = if (activeSubSection == ArchiveSubSection.PRODUCTS) themeColors.primary else Color.Transparent,
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -952,7 +955,7 @@ fun ArchiveTabContent(viewModel: ShopViewModel) {
                     .height(38.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .clickable { activeSubSection = ArchiveSubSection.TRANSACTIONS },
-                color = if (activeSubSection == ArchiveSubSection.TRANSACTIONS) BrandPrimary else Color.Transparent,
+                color = if (activeSubSection == ArchiveSubSection.TRANSACTIONS) themeColors.primary else Color.Transparent,
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -1093,7 +1096,7 @@ fun ArchiveTabContent(viewModel: ShopViewModel) {
                                             text = product.price.format(isArabic),
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 13.sp,
-                                            color = BrandPrimary
+                                            color = themeColors.primary
                                         )
                                     }
 
@@ -1301,9 +1304,9 @@ fun AppearanceTabContent(viewModel: ShopViewModel) {
             .padding(bottom = 100.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        // THEME MODE
+        // THEME MODE (Display Mode: Light / Dark / System)
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().testTag("display_mode_card"),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
@@ -1331,7 +1334,7 @@ fun AppearanceTabContent(viewModel: ShopViewModel) {
                     }
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = strings.themeTitle,
+                        text = strings.displayModeTitle,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp,
                         color = MaterialTheme.colorScheme.onSurface
@@ -1363,6 +1366,99 @@ fun AppearanceTabContent(viewModel: ShopViewModel) {
                     isSelected = settings.theme.equals(com.example.core.model.AppThemeMode.SYSTEM, ignoreCase = true),
                     onClick = { viewModel.setThemeMode(com.example.core.model.AppThemeMode.SYSTEM) }
                 )
+            }
+        }
+
+        // THEMES SECTION (Visual Identity: Purple, Gold, Black & White)
+        val currentVisualTheme by viewModel.currentVisualTheme.collectAsStateWithLifecycle()
+        val themeColors = LocalAppThemeColors.current
+
+        Card(
+            modifier = Modifier.fillMaxWidth().testTag("themes_selector_card"),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ColorLens,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        Text(
+                            text = strings.themesTitle,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = strings.themesSubtitle,
+                            fontSize = 11.5.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+
+                // Three selectable theme buttons side-by-side: [ Purple ] [ Gold ] [ Black & White ]
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // PURPLE
+                    ThemeVisualOptionCard(
+                        title = strings.themePurple,
+                        primaryColor = Color(0xFF9333EA),
+                        accentColor = Color(0xFFC084FC),
+                        backgroundColor = if (themeColors.isDark) Color(0xFF2D1845) else Color(0xFFF3E8FF),
+                        isSelected = currentVisualTheme == AppVisualTheme.PURPLE,
+                        testTag = "theme_button_purple",
+                        modifier = Modifier.weight(1f),
+                        onClick = { viewModel.setVisualTheme(AppVisualTheme.PURPLE) }
+                    )
+
+                    // GOLD
+                    ThemeVisualOptionCard(
+                        title = strings.themeGold,
+                        primaryColor = Color(0xFFD4AF37),
+                        accentColor = Color(0xFFE5C158),
+                        backgroundColor = if (themeColors.isDark) Color(0xFF3B2E15) else Color(0xFFFDF6E2),
+                        isSelected = currentVisualTheme == AppVisualTheme.GOLD,
+                        testTag = "theme_button_gold",
+                        modifier = Modifier.weight(1f),
+                        onClick = { viewModel.setVisualTheme(AppVisualTheme.GOLD) }
+                    )
+
+                    // BLACK & WHITE
+                    ThemeVisualOptionCard(
+                        title = strings.themeBlackAndWhite,
+                        primaryColor = if (themeColors.isDark) Color(0xFFFFFFFF) else Color(0xFF111111),
+                        accentColor = Color(0xFF888888),
+                        backgroundColor = if (themeColors.isDark) Color(0xFF2A2A2A) else Color(0xFFE5E5E5),
+                        isSelected = currentVisualTheme == AppVisualTheme.BLACK_AND_WHITE,
+                        testTag = "theme_button_black_and_white",
+                        modifier = Modifier.weight(1f),
+                        onClick = { viewModel.setVisualTheme(AppVisualTheme.BLACK_AND_WHITE) }
+                    )
+                }
             }
         }
 
@@ -1421,6 +1517,81 @@ fun AppearanceTabContent(viewModel: ShopViewModel) {
                     onClick = { viewModel.setLanguage(AppLanguage.ENGLISH) }
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun ThemeVisualOptionCard(
+    title: String,
+    primaryColor: Color,
+    accentColor: Color,
+    backgroundColor: Color,
+    isSelected: Boolean,
+    testTag: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
+    val cardContainerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surface
+
+    Card(
+        modifier = modifier
+            .clip(RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick)
+            .border(
+                width = if (isSelected) 2.dp else 1.dp,
+                color = borderColor,
+                shape = RoundedCornerShape(14.dp)
+            )
+            .testTag(testTag),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = cardContainerColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 2.dp else 0.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp, horizontal = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // Visual Preview Chip / Swatch
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(CircleShape)
+                    .background(primaryColor)
+                    .border(2.dp, if (isSelected) Color.White else Color.Transparent, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isSelected) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Selected",
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(accentColor)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = title,
+                fontSize = 12.sp,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                maxLines = 1
+            )
         }
     }
 }
@@ -1516,6 +1687,7 @@ fun LanguageOptionRow(
 @Composable
 fun ReportsTabContent(viewModel: ShopViewModel) {
     val strings = LocalStrings.current
+    val themeColors = LocalAppThemeColors.current
     val activeCustomers by viewModel.allActiveCustomers.collectAsStateWithLifecycle()
     val activeProducts by viewModel.activeProducts.collectAsStateWithLifecycle()
 
@@ -1534,7 +1706,7 @@ fun ReportsTabContent(viewModel: ShopViewModel) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(14.dp),
-            colors = CardDefaults.cardColors(containerColor = BrandPrimaryContainerLight)
+            colors = CardDefaults.cardColors(containerColor = themeColors.primaryContainer.copy(alpha = 0.45f))
         ) {
             Row(
                 modifier = Modifier.padding(14.dp),
@@ -1543,14 +1715,14 @@ fun ReportsTabContent(viewModel: ShopViewModel) {
                 Icon(
                     imageVector = Icons.Default.PictureAsPdf,
                     contentDescription = null,
-                    tint = BrandPrimary,
+                    tint = themeColors.primary,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     text = strings.pdfReportsCenterNotice,
                     fontSize = 12.sp,
-                    color = BrandPrimary,
+                    color = themeColors.primary,
                     lineHeight = 17.sp
                 )
             }
@@ -1627,7 +1799,7 @@ fun ReportsTabContent(viewModel: ShopViewModel) {
                                         showCustomerPickerModal = false
                                         viewModel.generateCustomerStatementReport(customer)
                                     },
-                                color = BrandBackgroundLight,
+                                color = themeColors.primaryContainer.copy(alpha = 0.35f),
                                 shape = RoundedCornerShape(10.dp)
                             ) {
                                 Row(
@@ -1639,7 +1811,7 @@ fun ReportsTabContent(viewModel: ShopViewModel) {
                                     Icon(
                                         imageVector = Icons.Default.People,
                                         contentDescription = null,
-                                        tint = BrandPrimary,
+                                        tint = themeColors.primary,
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Spacer(modifier = Modifier.width(10.dp))
@@ -1703,7 +1875,7 @@ fun ReportsTabContent(viewModel: ShopViewModel) {
                                         showProductPickerModal = false
                                         viewModel.generateProductSalesReport(product)
                                     },
-                                color = BrandBackgroundLight,
+                                color = themeColors.primaryContainer.copy(alpha = 0.35f),
                                 shape = RoundedCornerShape(10.dp)
                             ) {
                                 Row(
@@ -1715,7 +1887,7 @@ fun ReportsTabContent(viewModel: ShopViewModel) {
                                     Icon(
                                         imageVector = Icons.Default.Inventory2,
                                         contentDescription = null,
-                                        tint = BrandPrimary,
+                                        tint = themeColors.primary,
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Spacer(modifier = Modifier.width(10.dp))
@@ -1728,7 +1900,7 @@ fun ReportsTabContent(viewModel: ShopViewModel) {
                                         Text(
                                             text = product.price.format(true),
                                             fontSize = 12.sp,
-                                            color = BrandPrimary
+                                            color = themeColors.primary
                                         )
                                     }
                                 }
@@ -1758,6 +1930,8 @@ fun PdfReportActionCard(
     modifier: Modifier = Modifier,
     testTag: String = ""
 ) {
+    val themeColors = LocalAppThemeColors.current
+
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -1779,13 +1953,13 @@ fun PdfReportActionCard(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(BrandPrimaryContainerLight),
+                        .background(themeColors.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = BrandPrimary,
+                        tint = themeColors.primary,
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -1813,7 +1987,7 @@ fun PdfReportActionCard(
 
             Button(
                 onClick = onClick,
-                colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
+                colors = ButtonDefaults.buttonColors(containerColor = themeColors.primary),
                 shape = RoundedCornerShape(10.dp),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                 modifier = Modifier.testTag(testTag)
@@ -1840,6 +2014,7 @@ fun PdfReportActionCard(
 @Composable
 fun AboutTabContent() {
     val strings = LocalStrings.current
+    val themeColors = LocalAppThemeColors.current
     var showPrivacyPolicy by remember { mutableStateOf(false) }
     var showTermsOfUse by remember { mutableStateOf(false) }
     var showContactDev by remember { mutableStateOf(false) }
@@ -1869,7 +2044,7 @@ fun AboutTabContent() {
                     modifier = Modifier
                         .size(64.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(BrandPrimary),
+                        .background(themeColors.primary),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -1886,7 +2061,7 @@ fun AboutTabContent() {
                     text = strings.appNameFull,
                     fontWeight = FontWeight.Bold,
                     fontSize = 17.sp,
-                    color = BrandPrimary
+                    color = themeColors.primary
                 )
 
                 Text(
@@ -1946,13 +2121,13 @@ fun AboutTabContent() {
     if (showPrivacyPolicy) {
         AlertDialog(
             onDismissRequest = { showPrivacyPolicy = false },
-            icon = { Icon(Icons.Default.PrivacyTip, null, tint = BrandPrimary) },
+            icon = { Icon(Icons.Default.PrivacyTip, null, tint = themeColors.primary) },
             title = { Text(strings.privacyPolicyTitle, fontWeight = FontWeight.Bold) },
             text = { Text(strings.privacyPolicyContent, fontSize = 13.sp, lineHeight = 18.sp) },
             confirmButton = {
                 Button(
                     onClick = { showPrivacyPolicy = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = themeColors.primary)
                 ) { Text(strings.close) }
             },
             shape = RoundedCornerShape(18.dp),
@@ -1964,13 +2139,13 @@ fun AboutTabContent() {
     if (showTermsOfUse) {
         AlertDialog(
             onDismissRequest = { showTermsOfUse = false },
-            icon = { Icon(Icons.Default.Description, null, tint = BrandPrimary) },
+            icon = { Icon(Icons.Default.Description, null, tint = themeColors.primary) },
             title = { Text(strings.termsOfUseTitle, fontWeight = FontWeight.Bold) },
             text = { Text(strings.termsOfUseContent, fontSize = 13.sp, lineHeight = 18.sp) },
             confirmButton = {
                 Button(
                     onClick = { showTermsOfUse = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = themeColors.primary)
                 ) { Text(strings.close) }
             },
             shape = RoundedCornerShape(18.dp),
@@ -1982,13 +2157,13 @@ fun AboutTabContent() {
     if (showContactDev) {
         AlertDialog(
             onDismissRequest = { showContactDev = false },
-            icon = { Icon(Icons.Default.Email, null, tint = BrandPrimary) },
+            icon = { Icon(Icons.Default.Email, null, tint = themeColors.primary) },
             title = { Text(strings.contactDeveloperTitle, fontWeight = FontWeight.Bold) },
             text = { Text(strings.contactDeveloperContent, fontSize = 13.sp, lineHeight = 18.sp) },
             confirmButton = {
                 Button(
                     onClick = { showContactDev = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = themeColors.primary)
                 ) { Text(strings.close) }
             },
             shape = RoundedCornerShape(18.dp),
@@ -2003,6 +2178,8 @@ fun AboutActionRow(
     title: String,
     onClick: () -> Unit
 ) {
+    val themeColors = LocalAppThemeColors.current
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -2015,7 +2192,7 @@ fun AboutActionRow(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = BrandPrimary,
+                tint = themeColors.primary,
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.width(12.dp))

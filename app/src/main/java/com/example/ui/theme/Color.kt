@@ -2,7 +2,7 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Primary brand colors
+// Default backward-compatible references
 val BrandPrimary = Color(0xFF5B1E5C)
 val BrandSecondary = Color(0xFF4A154B)
 val BrandTertiary = Color(0xFF8A2E8B)

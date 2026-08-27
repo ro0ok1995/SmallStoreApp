@@ -61,12 +61,11 @@ import com.example.data.localization.LocalStrings
 import com.example.ui.components.AddEditCustomerDialog
 import com.example.ui.components.RecordPaymentDialog
 import com.example.ui.components.StatusBadge
-import com.example.ui.theme.BrandBackgroundLight
-import com.example.ui.theme.BrandPrimary
-import com.example.ui.theme.BrandPrimaryContainerLight
-import com.example.ui.theme.BrandSecondary
+import com.example.ui.components.ThemedHeaderBox
+import com.example.ui.theme.LocalAppThemeColors
 import com.example.ui.theme.FinancialDebt
 import com.example.ui.theme.FinancialPayment
+import com.example.ui.theme.FinancialPaymentContainer
 import com.example.ui.viewmodel.ScreenDestination
 import com.example.ui.viewmodel.ShopViewModel
 
@@ -85,6 +84,7 @@ fun CustomerDetailsScreen(
 ) {
     val context = LocalContext.current
     val strings = LocalStrings.current
+    val themeColors = LocalAppThemeColors.current
 
     val allCustomers by viewModel.allActiveCustomers.collectAsStateWithLifecycle()
     val customer = allCustomers.find { it.id == customerId }
@@ -133,72 +133,61 @@ fun CustomerDetailsScreen(
             // HEADER (STORE IDENTITY & BACK NAVIGATION)
             // ==========================================
             item {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = Color.Transparent,
-                    shadowElevation = 4.dp
+                ThemedHeaderBox(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Box(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(BrandPrimary, BrandSecondary)
+                            .padding(start = 8.dp, end = 16.dp, top = 14.dp, bottom = 18.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = { viewModel.closeCustomerDetails() },
+                            modifier = Modifier.testTag("customer_details_back_btn")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = strings.cancel,
+                                tint = Color.White
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(4.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = customer.name,
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 19.sp
+                                ),
+                                maxLines = 1
+                            )
+                            Text(
+                                text = strings.customerDetailsTitle,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = Color.White.copy(alpha = 0.85f),
+                                    fontSize = 12.sp
                                 )
                             )
-                            .padding(start = 8.dp, end = 16.dp, top = 14.dp, bottom = 18.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
+                        }
+
+                        IconButton(
+                            onClick = { showEditCustomerDialog = true },
+                            modifier = Modifier
+                                .size(38.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.18f))
+                                .testTag("edit_customer_header_btn")
                         ) {
-                            IconButton(
-                                onClick = { viewModel.closeCustomerDetails() },
-                                modifier = Modifier.testTag("customer_details_back_btn")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowBack,
-                                    contentDescription = strings.cancel,
-                                    tint = Color.White
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.width(4.dp))
-
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = customer.name,
-                                    style = MaterialTheme.typography.titleLarge.copy(
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 19.sp
-                                    ),
-                                    maxLines = 1
-                                )
-                                Text(
-                                    text = strings.customerDetailsTitle,
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        color = Color.White.copy(alpha = 0.85f),
-                                        fontSize = 12.sp
-                                    )
-                                )
-                            }
-
-                            IconButton(
-                                onClick = { showEditCustomerDialog = true },
-                                modifier = Modifier
-                                    .size(38.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.18f))
-                                    .testTag("edit_customer_header_btn")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = strings.editCustomer,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = strings.editCustomer,
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
                     }
                 }
@@ -236,14 +225,14 @@ fun CustomerDetailsScreen(
                                     modifier = Modifier
                                         .size(54.dp)
                                         .clip(CircleShape)
-                                        .background(BrandPrimaryContainerLight),
+                                        .background(themeColors.primaryContainer),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
                                         text = customer.name.take(1),
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 24.sp,
-                                        color = BrandPrimary
+                                        color = themeColors.primary
                                     )
                                 }
 
@@ -255,7 +244,7 @@ fun CustomerDetailsScreen(
                                         style = MaterialTheme.typography.titleMedium.copy(
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 18.sp,
-                                            color = Color(0xFF1C1B1F)
+                                            color = MaterialTheme.colorScheme.onSurface
                                         ),
                                         maxLines = 1
                                     )
@@ -274,14 +263,14 @@ fun CustomerDetailsScreen(
                                             Icon(
                                                 imageVector = Icons.Default.Phone,
                                                 contentDescription = null,
-                                                tint = BrandPrimary,
+                                                tint = themeColors.primary,
                                                 modifier = Modifier.size(14.dp)
                                             )
                                             Spacer(modifier = Modifier.width(4.dp))
                                             Text(
                                                 text = customer.phone,
                                                 style = MaterialTheme.typography.bodyMedium.copy(
-                                                    color = BrandPrimary,
+                                                    color = themeColors.primary,
                                                     fontSize = 13.sp,
                                                     fontWeight = FontWeight.SemiBold
                                                 )
@@ -299,14 +288,14 @@ fun CustomerDetailsScreen(
                             Text(
                                 text = "${strings.customerAddress}: ${customer.address}",
                                 style = MaterialTheme.typography.bodySmall.copy(
-                                    color = Color(0xFF757575),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontSize = 12.sp
                                 )
                             )
                         }
 
                         Divider(
-                            color = Color(0xFFF0F0F0),
+                            color = MaterialTheme.colorScheme.outlineVariant,
                             thickness = 1.dp,
                             modifier = Modifier.padding(vertical = 16.dp)
                         )
@@ -350,7 +339,7 @@ fun CustomerDetailsScreen(
                     text = strings.primaryActionsTitle,
                     style = MaterialTheme.typography.titleSmall.copy(
                         fontWeight = FontWeight.Bold,
-                        color = BrandSecondary,
+                        color = themeColors.primary,
                         fontSize = 14.sp
                     ),
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
@@ -361,8 +350,8 @@ fun CustomerDetailsScreen(
             item {
                 PrimaryActionCard(
                     icon = Icons.Default.ShoppingCart,
-                    iconTint = BrandPrimary,
-                    iconContainerColor = BrandPrimaryContainerLight,
+                    iconTint = themeColors.primary,
+                    iconContainerColor = themeColors.primaryContainer,
                     title = strings.recordPurchase,
                     subtitle = strings.recordPurchaseDesc,
                     onClick = {
@@ -376,8 +365,8 @@ fun CustomerDetailsScreen(
             item {
                 PrimaryActionCard(
                     icon = Icons.Default.Assessment,
-                    iconTint = Color(0xFF1565C0),
-                    iconContainerColor = Color(0xFFE3F2FD),
+                    iconTint = themeColors.secondary,
+                    iconContainerColor = themeColors.primaryContainer.copy(alpha = 0.5f),
                     title = strings.viewAccountStatement,
                     subtitle = strings.viewAccountStatementDesc,
                     onClick = {
@@ -392,7 +381,7 @@ fun CustomerDetailsScreen(
                 PrimaryActionCard(
                     icon = Icons.Default.Payments,
                     iconTint = FinancialPayment,
-                    iconContainerColor = Color(0xFFE8F5E9),
+                    iconContainerColor = FinancialPaymentContainer,
                     title = strings.recordPayment,
                     subtitle = if (customerDebt.isPositive()) strings.recordPaymentDesc else strings.accountFullyPaid,
                     onClick = { showPaymentDialog = true },
@@ -490,14 +479,14 @@ private fun PrimaryActionCard(
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
-                            color = Color(0xFF1C1B1F)
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.bodySmall.copy(
-                            color = Color(0xFF757575),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 12.sp
                         )
                     )
@@ -507,7 +496,7 @@ private fun PrimaryActionCard(
             Icon(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = null,
-                tint = Color(0xFFBDBDBD),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 modifier = Modifier.size(22.dp)
             )
         }

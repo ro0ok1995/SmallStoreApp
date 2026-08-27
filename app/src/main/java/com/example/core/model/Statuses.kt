@@ -45,6 +45,12 @@ object AppThemeMode {
     const val SYSTEM = "system"
 }
 
+object AppVisualThemeType {
+    const val BLACK_AND_WHITE = "black_and_white"
+    const val PURPLE = "purple"
+    const val GOLD = "gold"
+}
+
 object CountryConstants {
     const val DEFAULT_COUNTRY_CODE = "+970"
     const val DEFAULT_COUNTRY_NAME_AR = "فلسطين"

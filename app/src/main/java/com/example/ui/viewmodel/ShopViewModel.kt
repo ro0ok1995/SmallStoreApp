@@ -3,11 +3,14 @@ package com.example.ui.viewmodel
 import android.app.Application
 import android.content.Intent
 import android.net.Uri
+import android.content.Context
 import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.core.business.DebtEngine
 import com.example.core.model.AppLanguageCode
+import com.example.core.model.AppVisualThemeType
+import com.example.ui.theme.AppVisualTheme
 import com.example.core.model.CartItem
 import com.example.core.model.Customer
 import com.example.core.model.CustomerStatus
@@ -65,6 +68,13 @@ class ShopViewModel(application: Application) : AndroidViewModel(application) {
     // Language State
     private val _currentLanguage = MutableStateFlow(AppLanguage.ARABIC)
     val currentLanguage: StateFlow<AppLanguage> = _currentLanguage.asStateFlow()
+
+    // Visual Theme State (Defaults to Black & White on first launch)
+    private val themePrefs = application.getSharedPreferences("smallstore_appearance_prefs", Context.MODE_PRIVATE)
+    private val _currentVisualTheme = MutableStateFlow(
+        AppVisualTheme.fromCode(themePrefs.getString("app_visual_theme", AppVisualThemeType.BLACK_AND_WHITE))
+    )
+    val currentVisualTheme: StateFlow<AppVisualTheme> = _currentVisualTheme.asStateFlow()
 
     // UI Message Events (One-shot)
     private val _uiEvents = MutableSharedFlow<String>()
@@ -407,6 +417,19 @@ class ShopViewModel(application: Application) : AndroidViewModel(application) {
         _currentLanguage.value = language
         viewModelScope.launch {
             repository.setLanguage(language.code)
+        }
+    }
+
+    fun setVisualTheme(theme: AppVisualTheme) {
+        _currentVisualTheme.value = theme
+        themePrefs.edit().putString("app_visual_theme", theme.code).apply()
+        viewModelScope.launch {
+            val name = when (theme) {
+                AppVisualTheme.PURPLE -> if (_currentLanguage.value == AppLanguage.ARABIC) "السمة البنفسجية" else "Purple Theme"
+                AppVisualTheme.GOLD -> if (_currentLanguage.value == AppLanguage.ARABIC) "السمة الذهبية" else "Gold Theme"
+                AppVisualTheme.BLACK_AND_WHITE -> if (_currentLanguage.value == AppLanguage.ARABIC) "سمة الأبيض والأسود" else "Black & White Theme"
+            }
+            _uiEvents.emit(if (_currentLanguage.value == AppLanguage.ARABIC) "تم تفعيل $name بنجاح." else "$name activated.")
         }
     }
 

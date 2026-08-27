@@ -56,10 +56,9 @@ import com.example.core.model.CustomerWithDebt
 import com.example.data.localization.LocalStrings
 import com.example.ui.components.AddEditCustomerDialog
 import com.example.ui.components.SearchBar
-import com.example.ui.theme.BrandBackgroundLight
-import com.example.ui.theme.BrandPrimary
-import com.example.ui.theme.BrandPrimaryContainerLight
-import com.example.ui.theme.BrandSecondary
+import com.example.ui.components.ThemedHeaderBox
+import com.example.ui.components.ThemedPrimaryButton
+import com.example.ui.theme.LocalAppThemeColors
 import com.example.ui.theme.FinancialDebt
 import com.example.ui.theme.FinancialPayment
 import com.example.ui.viewmodel.ShopViewModel
@@ -78,6 +77,7 @@ fun HomeScreen(
     val searchQuery by viewModel.customerSearchQuery.collectAsStateWithLifecycle()
     val shopSettings by viewModel.shopSettings.collectAsStateWithLifecycle()
     val allActiveCustomers by viewModel.allActiveCustomers.collectAsStateWithLifecycle()
+    val themeColors = LocalAppThemeColors.current
 
     var showAddCustomerDialog by remember { mutableStateOf(false) }
 
@@ -94,59 +94,50 @@ fun HomeScreen(
             // HEADER & SEARCH SECTION
             // ==========================================
             item {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = Color.Transparent,
-                    shadowElevation = 4.dp
+                ThemedHeaderBox(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Box(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(BrandPrimary, BrandSecondary)
-                                )
-                            )
                             .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 18.dp)
                     ) {
-                        Column {
-                            // Top Bar: Store Name & Quick Add Customer Action
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = shopSettings.storeName.ifBlank { strings.appName },
-                                        style = MaterialTheme.typography.titleLarge.copy(
-                                            color = Color.White,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 20.sp
-                                        ),
-                                        maxLines = 1
-                                    )
-                                    Text(
-                                        text = strings.homeTitle,
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = Color.White.copy(alpha = 0.85f),
-                                            fontSize = 12.sp
-                                        ),
-                                        maxLines = 1
-                                    )
-                                }
+                        // Top Bar: Store Name & Quick Add Customer Action
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = shopSettings.storeName.ifBlank { strings.appName },
+                                    style = MaterialTheme.typography.titleLarge.copy(
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 20.sp
+                                    ),
+                                    maxLines = 1
+                                )
+                                Text(
+                                    text = strings.homeTitle,
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = Color.White.copy(alpha = 0.85f),
+                                        fontSize = 12.sp
+                                    ),
+                                    maxLines = 1
+                                )
                             }
-
-                            Spacer(modifier = Modifier.height(14.dp))
-
-                            // Customer Search Field (Name & Phone with Country Code support)
-                            SearchBar(
-                                query = searchQuery,
-                                onQueryChange = { viewModel.setCustomerSearchQuery(it) },
-                                placeholder = strings.searchCustomerHint,
-                                modifier = Modifier.fillMaxWidth()
-                            )
                         }
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        // Customer Search Field (Name & Phone with Country Code support)
+                        SearchBar(
+                            query = searchQuery,
+                            onQueryChange = { viewModel.setCustomerSearchQuery(it) },
+                            placeholder = strings.searchCustomerHint,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }
@@ -165,7 +156,7 @@ fun HomeScreen(
                             text = strings.customersList,
                             style = MaterialTheme.typography.titleSmall.copy(
                                 fontWeight = FontWeight.Bold,
-                                color = BrandSecondary,
+                                color = MaterialTheme.colorScheme.primary,
                                 fontSize = 14.sp
                             )
                         )
@@ -173,7 +164,7 @@ fun HomeScreen(
                         Text(
                             text = "${customersWithDebt.size} ${strings.tabCustomers}",
                             style = MaterialTheme.typography.bodySmall.copy(
-                                color = Color(0xFF757575),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium
                             )
@@ -461,9 +452,8 @@ private fun NoCustomersEmptyState(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
+            ThemedPrimaryButton(
                 onClick = onAddCustomer,
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(14.dp),
                 modifier = Modifier
                     .height(48.dp)
@@ -533,7 +523,7 @@ private fun NoSearchResultsEmptyState(
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = Color(0xFF1C1B1F)
+                    color = MaterialTheme.colorScheme.onSurface
                 ),
                 textAlign = TextAlign.Center
             )
@@ -543,7 +533,7 @@ private fun NoSearchResultsEmptyState(
             Text(
                 text = "\"$searchQuery\"",
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 13.sp
                 ),
                 textAlign = TextAlign.Center
@@ -558,7 +548,7 @@ private fun NoSearchResultsEmptyState(
             ) {
                 Text(
                     text = strings.cancel,
-                    color = BrandPrimary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold
                 )
             }

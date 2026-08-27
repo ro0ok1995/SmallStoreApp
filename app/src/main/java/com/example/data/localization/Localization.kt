@@ -318,6 +318,15 @@ interface Strings {
     val themeLightDesc: String
     val themeDarkDesc: String
     val themeSystemDesc: String
+    val displayModeTitle: String
+    val themesTitle: String
+    val themesSubtitle: String
+    val themePurple: String
+    val themeGold: String
+    val themeBlackAndWhite: String
+    val themePurpleDesc: String
+    val themeGoldDesc: String
+    val themeBlackAndWhiteDesc: String
     val appVersionLabel: String
     val appVersionValue: String
     val developerLabel: String
@@ -643,13 +652,22 @@ object ArabicStrings : Strings {
     override val cancelledTxNotice = "المعاملات الملغاة يتم الاحتفاظ بها كأرشيف تاريخي غير قابل للتعديل للحفاظ على الدقة المحاسبية."
     override val permanentDeleteConfirmPrompt = "تحذير: سيتم حذف هذا السجل نهائياً ولن يمكن استرجاعه. هل تريد المتابعة؟"
 
-    override val themeTitle = "نمط المظهر"
+    override val themeTitle = "وضع العرض"
     override val themeLight = "فاتح"
     override val themeDark = "داكن"
     override val themeSystem = "تلقائي (حسب النظام)"
     override val themeLightDesc = "مظهر ناصع ومريح للإضاءة العالية"
     override val themeDarkDesc = "مظهر داكن مريح للعين وموفر للطاقة"
     override val themeSystemDesc = "يتبع تلقائياً إعدادات نظام جهازك"
+    override val displayModeTitle = "وضع العرض (الإضاءة)"
+    override val themesTitle = "السمات (الهوية البصرية)"
+    override val themesSubtitle = "اختر الطابع اللوني والتصميمي المفضل للتطبيق"
+    override val themePurple = "بنفسجي"
+    override val themeGold = "ذهبي"
+    override val themeBlackAndWhite = "أبيض وأسود"
+    override val themePurpleDesc = "طابع عصري حديث بلمسات بنفسجية حيوية"
+    override val themeGoldDesc = "طابع راقٍ وهادئ بلمسات ذهبية دافئة"
+    override val themeBlackAndWhiteDesc = "طابع محاسبي عملي سريع بدون مؤثرات حركية"
 
     override val appVersionLabel = "الإصدار:"
     override val appVersionValue = "v1.0.0"
@@ -975,13 +993,22 @@ object EnglishStrings : Strings {
     override val cancelledTxNotice = "Cancelled transactions are retained as an immutable historical audit trail to ensure accounting integrity."
     override val permanentDeleteConfirmPrompt = "Warning: This record will be permanently deleted and cannot be recovered. Do you wish to proceed?"
 
-    override val themeTitle = "Theme Mode"
+    override val themeTitle = "Display Mode"
     override val themeLight = "Light"
     override val themeDark = "Dark"
     override val themeSystem = "System Default"
     override val themeLightDesc = "Bright and clean layout for daylight use"
     override val themeDarkDesc = "Dark layout that is easy on the eyes and saves battery"
     override val themeSystemDesc = "Automatically matches your device system theme"
+    override val displayModeTitle = "Display Mode"
+    override val themesTitle = "Themes"
+    override val themesSubtitle = "Choose the visual identity and color scheme for the application"
+    override val themePurple = "Purple"
+    override val themeGold = "Gold"
+    override val themeBlackAndWhite = "Black & White"
+    override val themePurpleDesc = "Modern energetic violet & purple visual theme"
+    override val themeGoldDesc = "Warm, elegant & luxurious gold visual theme"
+    override val themeBlackAndWhiteDesc = "Pure monochrome focused interface with static performance"
 
     override val appVersionLabel = "Version:"
     override val appVersionValue = "v1.0.0"

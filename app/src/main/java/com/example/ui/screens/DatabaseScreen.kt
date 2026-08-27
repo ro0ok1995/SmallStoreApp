@@ -78,10 +78,7 @@ import com.example.ui.components.AppHeader
 import com.example.ui.components.ProductImage
 import com.example.ui.components.SearchBar
 import com.example.ui.components.StatusBadge
-import com.example.ui.theme.BrandBackgroundLight
-import com.example.ui.theme.BrandPrimary
-import com.example.ui.theme.BrandPrimaryContainerLight
-import com.example.ui.theme.BrandSecondary
+import com.example.ui.theme.LocalAppThemeColors
 import com.example.ui.theme.FinancialDebt
 import com.example.ui.theme.FinancialDebtContainer
 import com.example.ui.viewmodel.ShopViewModel
@@ -104,6 +101,7 @@ fun DatabaseScreen(
     modifier: Modifier = Modifier
 ) {
     val strings = LocalStrings.current
+    val themeColors = LocalAppThemeColors.current
     val currentLang = LocalAppLanguage.current
     val isArabic = currentLang == AppLanguage.ARABIC
 
@@ -304,13 +302,13 @@ fun DatabaseScreen(
                                         Text(
                                             text = label,
                                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                            color = if (isSelected) BrandPrimary else Color.Unspecified
+                                            color = if (isSelected) themeColors.primary else Color.Unspecified
                                         )
                                         if (isSelected) {
                                             Icon(
                                                 imageVector = Icons.Default.Check,
                                                 contentDescription = null,
-                                                tint = BrandPrimary,
+                                                tint = themeColors.primary,
                                                 modifier = Modifier.size(16.dp)
                                             )
                                         }
@@ -375,7 +373,7 @@ fun DatabaseScreen(
                     text = countText,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    color = BrandPrimary
+                    color = themeColors.primary
                 )
 
                 Button(
@@ -386,7 +384,7 @@ fun DatabaseScreen(
                             showAddProductDialog = true
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
+                    colors = ButtonDefaults.buttonColors(containerColor = themeColors.primary),
                     shape = RoundedCornerShape(10.dp),
                     contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
                     modifier = Modifier.testTag("add_new_btn")
@@ -654,6 +652,7 @@ fun CustomerDatabaseCard(
     modifier: Modifier = Modifier
 ) {
     val strings = LocalStrings.current
+    val themeColors = LocalAppThemeColors.current
     var menuExpanded by remember { mutableStateOf(false) }
 
     Card(
@@ -681,12 +680,12 @@ fun CustomerDatabaseCard(
                     modifier = Modifier
                         .size(34.dp)
                         .clip(CircleShape)
-                        .background(BrandPrimaryContainerLight),
+                        .background(themeColors.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "#$serialNumber",
-                        color = BrandPrimary,
+                        color = themeColors.primary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp
                     )
@@ -700,7 +699,7 @@ fun CustomerDatabaseCard(
                             text = customer.name,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
-                            color = Color(0xFF1F2937)
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         StatusBadge(status = customer.status)
@@ -713,14 +712,14 @@ fun CustomerDatabaseCard(
                             Icon(
                                 imageVector = Icons.Default.Phone,
                                 contentDescription = null,
-                                tint = Color(0xFF6B7280),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(13.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = customer.formattedPhoneWithCode,
                                 fontSize = 12.sp,
-                                color = Color(0xFF6B7280)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -732,7 +731,7 @@ fun CustomerDatabaseCard(
                             Text(
                                 text = "${strings.currentDebt}: ",
                                 fontSize = 12.sp,
-                                color = Color(0xFF6B7280)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
                                 text = outstandingDebt.format(isArabic),
@@ -754,7 +753,7 @@ fun CustomerDatabaseCard(
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = "Actions Menu",
-                        tint = BrandPrimary
+                        tint = themeColors.primary
                     )
                 }
 
@@ -770,7 +769,7 @@ fun CustomerDatabaseCard(
                                     Icon(
                                         imageVector = Icons.Default.Edit,
                                         contentDescription = null,
-                                        tint = BrandPrimary,
+                                        tint = themeColors.primary,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 },
@@ -785,7 +784,7 @@ fun CustomerDatabaseCard(
                                     Icon(
                                         imageVector = Icons.Default.Archive,
                                         contentDescription = null,
-                                        tint = BrandSecondary,
+                                        tint = MaterialTheme.colorScheme.secondary,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 },
@@ -832,7 +831,7 @@ fun CustomerDatabaseCard(
                                     Icon(
                                         imageVector = Icons.Default.Edit,
                                         contentDescription = null,
-                                        tint = BrandPrimary,
+                                        tint = themeColors.primary,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 },
@@ -913,6 +912,7 @@ fun ProductDatabaseCard(
     modifier: Modifier = Modifier
 ) {
     val strings = LocalStrings.current
+    val themeColors = LocalAppThemeColors.current
     var menuExpanded by remember { mutableStateOf(false) }
 
     Card(
@@ -952,7 +952,7 @@ fun ProductDatabaseCard(
                             text = product.name,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
-                            color = Color(0xFF1F2937)
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         StatusBadge(status = product.status)
@@ -964,7 +964,7 @@ fun ProductDatabaseCard(
                         text = product.price.format(isArabic),
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
-                        color = BrandPrimary
+                        color = themeColors.primary
                     )
                 }
             }
@@ -978,7 +978,7 @@ fun ProductDatabaseCard(
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = "Product Actions Menu",
-                        tint = BrandPrimary
+                        tint = themeColors.primary
                     )
                 }
 
@@ -994,7 +994,7 @@ fun ProductDatabaseCard(
                                     Icon(
                                         imageVector = Icons.Default.Edit,
                                         contentDescription = null,
-                                        tint = BrandPrimary,
+                                        tint = themeColors.primary,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 },
@@ -1009,7 +1009,7 @@ fun ProductDatabaseCard(
                                     Icon(
                                         imageVector = Icons.Default.Archive,
                                         contentDescription = null,
-                                        tint = BrandSecondary,
+                                        tint = MaterialTheme.colorScheme.secondary,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 },
@@ -1056,7 +1056,7 @@ fun ProductDatabaseCard(
                                     Icon(
                                         imageVector = Icons.Default.Edit,
                                         contentDescription = null,
-                                        tint = BrandPrimary,
+                                        tint = themeColors.primary,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 },
@@ -1127,6 +1127,7 @@ fun EmptyDataView(
     message: String,
     modifier: Modifier = Modifier
 ) {
+    val themeColors = LocalAppThemeColors.current
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -1138,13 +1139,13 @@ fun EmptyDataView(
             modifier = Modifier
                 .size(64.dp)
                 .clip(CircleShape)
-                .background(BrandPrimaryContainerLight),
+                .background(themeColors.primaryContainer),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = BrandPrimary,
+                tint = themeColors.primary,
                 modifier = Modifier.size(32.dp)
             )
         }
@@ -1153,13 +1154,13 @@ fun EmptyDataView(
             text = title,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
-            color = Color(0xFF374151)
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = message,
             fontSize = 13.sp,
-            color = Color(0xFF6B7280)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

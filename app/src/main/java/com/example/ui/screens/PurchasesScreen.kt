@@ -85,10 +85,9 @@ import com.example.data.localization.LocalStrings
 import com.example.ui.components.AddEditCustomerDialog
 import com.example.ui.components.EditQuantityDialog
 import com.example.ui.components.ProductImage
-import com.example.ui.theme.BrandBackgroundLight
-import com.example.ui.theme.BrandPrimary
-import com.example.ui.theme.BrandPrimaryContainerLight
-import com.example.ui.theme.BrandSecondary
+import com.example.ui.components.ThemedHeaderBox
+import com.example.ui.components.ThemedPrimaryButton
+import com.example.ui.theme.LocalAppThemeColors
 import com.example.ui.theme.FinancialCash
 import com.example.ui.theme.FinancialCashContainer
 import com.example.ui.theme.FinancialDebt
@@ -109,6 +108,7 @@ fun PurchasesScreen(
     modifier: Modifier = Modifier
 ) {
     val strings = LocalStrings.current
+    val themeColors = LocalAppThemeColors.current
     val customers by viewModel.allActiveCustomers.collectAsStateWithLifecycle()
     val products by viewModel.activeProducts.collectAsStateWithLifecycle()
     val selectedCustomer by viewModel.selectedPurchaseCustomer.collectAsStateWithLifecycle()
@@ -142,128 +142,117 @@ fun PurchasesScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             // TOP BAR (RTL AWARE, CUSTOMER IDENTITY, CART & CLEAR ACTIONS)
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = Color.Transparent,
-                shadowElevation = 4.dp
+            ThemedHeaderBox(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Box(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(BrandPrimary, BrandSecondary)
-                            )
-                        )
-                        .padding(start = 8.dp, end = 12.dp, top = 12.dp, bottom = 14.dp)
+                        .padding(start = 8.dp, end = 12.dp, top = 12.dp, bottom = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+                    // Back navigation & Header
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        modifier = Modifier.weight(1f)
                     ) {
-                        // Back navigation & Header
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.weight(1f)
+                        IconButton(
+                            onClick = {
+                                if (selectedCustomer != null) {
+                                    viewModel.openCustomerDetails(selectedCustomer!!.id)
+                                } else {
+                                    viewModel.navigateTo(ScreenDestination.HOME)
+                                }
+                            },
+                            modifier = Modifier.testTag("purchases_back_btn")
                         ) {
-                            IconButton(
-                                onClick = {
-                                    if (selectedCustomer != null) {
-                                        viewModel.openCustomerDetails(selectedCustomer!!.id)
-                                    } else {
-                                        viewModel.navigateTo(ScreenDestination.HOME)
-                                    }
-                                },
-                                modifier = Modifier.testTag("purchases_back_btn")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowBack,
-                                    contentDescription = strings.cancel,
-                                    tint = Color.White
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.width(4.dp))
-
-                            Column {
-                                Text(
-                                    text = if (selectedCustomer != null) {
-                                        "${strings.recordTransactionFor}: ${selectedCustomer!!.name}"
-                                    } else {
-                                        strings.purchasesTitle
-                                    },
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 17.sp
-                                    ),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-
-                                Text(
-                                    text = if (selectedCustomer != null) {
-                                        if (isCredit) strings.creditPurchase else strings.cashPurchase
-                                    } else {
-                                        strings.cashCustomerWalkIn
-                                    },
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        color = Color.White.copy(alpha = 0.85f),
-                                        fontSize = 12.sp
-                                    )
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = strings.cancel,
+                                tint = Color.White
+                            )
                         }
 
-                        // Actions: Clear cart & Cart Badge
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (cartItems.isNotEmpty()) {
-                                IconButton(
-                                    onClick = { viewModel.clearCart() },
-                                    modifier = Modifier
-                                        .size(36.dp)
-                                        .clip(CircleShape)
-                                        .background(Color.White.copy(alpha = 0.18f))
-                                        .testTag("clear_cart_top_btn")
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.DeleteSweep,
-                                        contentDescription = strings.clearCart,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(6.dp))
-                            }
+                        Spacer(modifier = Modifier.width(4.dp))
 
-                            BadgedBox(
-                                badge = {
-                                    if (cartItems.isNotEmpty()) {
-                                        Badge(
-                                            containerColor = FinancialDebt,
-                                            contentColor = Color.White,
-                                            modifier = Modifier.testTag("cart_badge_count")
-                                        ) {
-                                            Text(text = "$totalItemCount", fontWeight = FontWeight.Bold)
-                                        }
+                        Column {
+                            Text(
+                                text = if (selectedCustomer != null) {
+                                    "${strings.recordTransactionFor}: ${selectedCustomer!!.name}"
+                                } else {
+                                    strings.purchasesTitle
+                                },
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 17.sp
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+
+                            Text(
+                                text = if (selectedCustomer != null) {
+                                    if (isCredit) strings.creditPurchase else strings.cashPurchase
+                                } else {
+                                    strings.cashCustomerWalkIn
+                                },
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = Color.White.copy(alpha = 0.85f),
+                                    fontSize = 12.sp
+                                )
+                            )
+                        }
+                    }
+
+                    // Actions: Clear cart & Cart Badge
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (cartItems.isNotEmpty()) {
+                            IconButton(
+                                onClick = { viewModel.clearCart() },
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.18f))
+                                    .testTag("clear_cart_top_btn")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.DeleteSweep,
+                                    contentDescription = strings.clearCart,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(6.dp))
+                        }
+
+                        BadgedBox(
+                            badge = {
+                                if (cartItems.isNotEmpty()) {
+                                    Badge(
+                                        containerColor = FinancialDebt,
+                                        contentColor = Color.White,
+                                        modifier = Modifier.testTag("cart_badge_count")
+                                    ) {
+                                        Text(text = "$totalItemCount", fontWeight = FontWeight.Bold)
                                     }
                                 }
+                            }
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.18f)),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(38.dp)
-                                        .clip(CircleShape)
-                                        .background(Color.White.copy(alpha = 0.18f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.ShoppingCart,
-                                        contentDescription = strings.orderItems,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
+                                Icon(
+                                    imageVector = Icons.Default.ShoppingCart,
+                                    contentDescription = strings.orderItems,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
                         }
                     }
@@ -285,14 +274,14 @@ fun PurchasesScreen(
                         Text(
                             text = strings.searchProductsPlaceholder,
                             fontSize = 13.sp,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Search,
                             contentDescription = null,
-                            tint = BrandPrimary,
+                            tint = themeColors.primary,
                             modifier = Modifier.size(18.dp)
                         )
                     },
@@ -303,7 +292,7 @@ fun PurchasesScreen(
                                     imageVector = Icons.Default.Clear,
                                     contentDescription = "Clear search",
                                     modifier = Modifier.size(16.dp),
-                                    tint = Color.Gray
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -314,10 +303,10 @@ fun PurchasesScreen(
                         .testTag("product_search_input"),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        focusedBorderColor = BrandPrimary,
-                        unfocusedBorderColor = Color(0xFFE0E0E0)
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedBorderColor = themeColors.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
                     ),
                     singleLine = true
                 )
@@ -325,7 +314,7 @@ fun PurchasesScreen(
                 Surface(
                     onClick = { showCustomItemDialog = true },
                     shape = RoundedCornerShape(12.dp),
-                    color = BrandPrimaryContainerLight,
+                    color = themeColors.primaryContainer,
                     modifier = Modifier
                         .height(48.dp)
                         .testTag("add_custom_item_top_btn")
@@ -338,13 +327,13 @@ fun PurchasesScreen(
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = null,
-                            tint = BrandPrimary,
+                            tint = themeColors.primary,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = strings.customItem,
-                            color = BrandPrimary,
+                            color = themeColors.primary,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -457,7 +446,7 @@ fun PurchasesScreen(
                 }
 
                 // Complete Transaction Button
-                Button(
+                ThemedPrimaryButton(
                     onClick = {
                         if (cartItems.isEmpty()) {
                             emptyCartWarningMessage = strings.cartEmptyWarning
@@ -466,14 +455,7 @@ fun PurchasesScreen(
                         }
                     },
                     enabled = cartItems.isNotEmpty(),
-                    modifier = Modifier
-                        .height(50.dp)
-                        .testTag("complete_transaction_btn"),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = BrandPrimary,
-                        disabledContainerColor = Color(0xFFE0E0E0)
-                    )
+                    modifier = Modifier.testTag("complete_transaction_btn")
                 ) {
                     Icon(
                         imageVector = Icons.Default.ShoppingCart,
@@ -582,6 +564,7 @@ fun ProductGridCard(
     onQuantityChanged: (Double) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val themeColors = LocalAppThemeColors.current
     val isInCart = currentQuantity > 0.0
     var showEditQtyDialog by remember { mutableStateOf(false) }
 
@@ -591,7 +574,7 @@ fun ProductGridCard(
             .testTag("product_grid_card_${product.id}"),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = if (isInCart) androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null,
+        border = if (isInCart) androidx.compose.foundation.BorderStroke(1.5.dp, themeColors.primary) else null,
         elevation = CardDefaults.cardElevation(defaultElevation = if (isInCart) 3.dp else 1.dp)
     ) {
         Column(
@@ -605,7 +588,7 @@ fun ProductGridCard(
                     .height(84.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(
-                        if (isInCart) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+                        if (isInCart) themeColors.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -613,8 +596,8 @@ fun ProductGridCard(
                     imagePath = product.imagePath,
                     modifier = Modifier.fillMaxSize(),
                     placeholderIcon = Icons.Default.Inventory2,
-                    placeholderTint = if (isInCart) BrandPrimary else Color(0xFF9E9E9E),
-                    placeholderBackground = if (isInCart) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+                    placeholderTint = if (isInCart) themeColors.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    placeholderBackground = if (isInCart) themeColors.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
                 )
             }
 
@@ -635,7 +618,7 @@ fun ProductGridCard(
                 text = product.price.format(),
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 14.sp,
-                color = BrandPrimary
+                color = themeColors.primary
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -647,7 +630,7 @@ fun ProductGridCard(
                     .height(36.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(
-                        if (isInCart) BrandPrimaryContainerLight else MaterialTheme.colorScheme.surfaceVariant
+                        if (isInCart) themeColors.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
                     ),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -666,7 +649,7 @@ fun ProductGridCard(
                     Icon(
                         imageVector = Icons.Default.Remove,
                         contentDescription = "Decrease",
-                        tint = if (currentQuantity > 0.0) BrandPrimary else Color.LightGray,
+                        tint = if (currentQuantity > 0.0) themeColors.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -686,7 +669,7 @@ fun ProductGridCard(
                         },
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 14.sp,
-                        color = if (isInCart) BrandPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (isInCart) themeColors.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.testTag("product_qty_text_${product.id}")
                     )
                 }
@@ -700,7 +683,7 @@ fun ProductGridCard(
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Increase",
-                        tint = BrandPrimary,
+                        tint = themeColors.primary,
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -742,6 +725,7 @@ fun ReviewTransactionModal(
     onConfirm: (Customer, Boolean, String) -> Unit
 ) {
     val strings = LocalStrings.current
+    val themeColors = LocalAppThemeColors.current
     var currentlySelectedCustomer by remember(initialCustomer) { mutableStateOf(initialCustomer) }
     var currentIsCredit by remember(isCredit) { mutableStateOf(isCredit) }
     var currentNotes by remember(notes) { mutableStateOf(notes) }
@@ -789,13 +773,13 @@ fun ReviewTransactionModal(
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 18.sp,
-                                    color = BrandPrimary
+                                    color = themeColors.primary
                                 )
                             )
                             Text(
                                 text = "${cartItems.size} ${strings.orderItems}",
                                 style = MaterialTheme.typography.bodySmall.copy(
-                                    color = Color.Gray,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontSize = 12.sp
                                 )
                             )
@@ -806,12 +790,12 @@ fun ReviewTransactionModal(
                             modifier = Modifier
                                 .size(32.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFF0F0F0))
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Clear,
                                 contentDescription = strings.cancel,
-                                tint = Color.Gray,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -830,14 +814,14 @@ fun ReviewTransactionModal(
                                 text = "${strings.customer}:",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp,
-                                color = Color.DarkGray
+                                color = MaterialTheme.colorScheme.onSurface
                             )
 
                             TextButton(onClick = onAddNewCustomer) {
                                 Text(
                                     text = "+ " + strings.addCustomer,
                                     fontSize = 12.sp,
-                                    color = BrandPrimary,
+                                    color = themeColors.primary,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -849,8 +833,8 @@ fun ReviewTransactionModal(
                             // STATE A: Customer is selected -> Display: "العميل: محمد أحمد ✓" with change option
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = BrandPrimaryContainerLight.copy(alpha = 0.35f),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, BrandPrimary.copy(alpha = 0.5f)),
+                                color = themeColors.primaryContainer.copy(alpha = 0.35f),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, themeColors.primary.copy(alpha = 0.5f)),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
@@ -872,13 +856,13 @@ fun ReviewTransactionModal(
                                             modifier = Modifier
                                                 .size(36.dp)
                                                 .clip(CircleShape)
-                                                .background(BrandPrimary.copy(alpha = 0.15f)),
+                                                .background(themeColors.primary.copy(alpha = 0.15f)),
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Default.Person,
                                                 contentDescription = null,
-                                                tint = BrandPrimary,
+                                                tint = themeColors.primary,
                                                 modifier = Modifier.size(20.dp)
                                             )
                                         }
@@ -891,21 +875,21 @@ fun ReviewTransactionModal(
                                                     text = currentlySelectedCustomer!!.name,
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = 15.sp,
-                                                    color = Color(0xFF1C1B1F)
+                                                    color = MaterialTheme.colorScheme.onSurface
                                                 )
                                                 Spacer(modifier = Modifier.width(6.dp))
                                                 Text(
                                                     text = "✓",
                                                     fontWeight = FontWeight.ExtraBold,
                                                     fontSize = 15.sp,
-                                                    color = Color(0xFF2E7D32)
+                                                    color = FinancialPayment
                                                 )
                                             }
                                             if (currentlySelectedCustomer!!.phone.isNotBlank()) {
                                                 Text(
                                                     text = currentlySelectedCustomer!!.phone,
                                                     fontSize = 12.sp,
-                                                    color = Color.Gray
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
                                         }
@@ -919,7 +903,7 @@ fun ReviewTransactionModal(
                                             text = strings.changeCustomer,
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = BrandPrimary
+                                            color = themeColors.primary
                                         )
                                     }
                                 }
@@ -976,7 +960,7 @@ fun ReviewTransactionModal(
                                         .fillMaxWidth()
                                         .padding(10.dp)
                                 ) {
-                                    OutlinedTextField(
+                                     OutlinedTextField(
                                         value = customerSearchText,
                                         onValueChange = { customerSearchText = it },
                                         placeholder = { Text(strings.searchCustomerHint, fontSize = 12.sp) },
@@ -984,7 +968,7 @@ fun ReviewTransactionModal(
                                             Icon(
                                                 imageVector = Icons.Default.Search,
                                                 contentDescription = null,
-                                                tint = BrandPrimary,
+                                                tint = themeColors.primary,
                                                 modifier = Modifier.size(18.dp)
                                             )
                                         },
@@ -1035,7 +1019,7 @@ fun ReviewTransactionModal(
                                                         .fillMaxWidth()
                                                         .clip(RoundedCornerShape(8.dp))
                                                         .background(
-                                                            if (isCurrent) BrandPrimaryContainerLight.copy(alpha = 0.6f) else Color.Transparent
+                                                            if (isCurrent) themeColors.primaryContainer.copy(alpha = 0.6f) else Color.Transparent
                                                         )
                                                         .clickable {
                                                             currentlySelectedCustomer = cust
@@ -1052,13 +1036,13 @@ fun ReviewTransactionModal(
                                                             text = cust.name,
                                                             fontWeight = FontWeight.Medium,
                                                             fontSize = 13.sp,
-                                                            color = Color(0xFF1C1B1F)
+                                                            color = MaterialTheme.colorScheme.onSurface
                                                         )
                                                         if (cust.phone.isNotBlank()) {
                                                             Text(
                                                                 text = cust.phone,
                                                                 fontSize = 11.sp,
-                                                                color = Color.Gray
+                                                                color = MaterialTheme.colorScheme.onSurfaceVariant
                                                             )
                                                         }
                                                     }
@@ -1066,12 +1050,12 @@ fun ReviewTransactionModal(
                                                         Text(
                                                             text = "✓",
                                                             fontWeight = FontWeight.Bold,
-                                                            color = Color(0xFF2E7D32),
+                                                            color = FinancialPayment,
                                                             fontSize = 14.sp
                                                         )
                                                     }
                                                 }
-                                                Divider(color = Color(0xFFEEEEEE), thickness = 0.5.dp)
+                                                Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), thickness = 0.5.dp)
                                             }
                                         }
                                     }
@@ -1224,12 +1208,12 @@ fun ReviewTransactionModal(
                                         text = item.subtotal.format(),
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 13.sp,
-                                        color = BrandPrimary
+                                        color = themeColors.primary
                                     )
                                 }
 
                                 if (index < cartItems.size - 1) {
-                                    Divider(color = Color(0xFFEDEDED), thickness = 0.5.dp)
+                                    Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), thickness = 0.5.dp)
                                 }
                             }
                         }
@@ -1384,6 +1368,7 @@ fun AddCustomItemDialog(
     onAdd: (name: String, price: Money, quantity: Double) -> Unit
 ) {
     val strings = LocalStrings.current
+    val themeColors = LocalAppThemeColors.current
     var name by remember { mutableStateOf("") }
     var priceText by remember { mutableStateOf("") }
     var quantityText by remember { mutableStateOf("1") }
@@ -1395,7 +1380,7 @@ fun AddCustomItemDialog(
             Text(
                 text = strings.customItem,
                 fontWeight = FontWeight.Bold,
-                color = BrandPrimary,
+                color = themeColors.primary,
                 fontSize = 16.sp
             )
         },
@@ -1459,7 +1444,7 @@ fun AddCustomItemDialog(
                     val qty = quantityText.toDoubleOrNull() ?: 1.0
                     onAdd(name.trim(), money, qty)
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
+                colors = ButtonDefaults.buttonColors(containerColor = themeColors.primary),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.testTag("confirm_add_custom_item_btn")
             ) {

@@ -1,9 +1,8 @@
 package com.example
 
+import androidx.compose.material3.Text
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
-import com.example.core.model.CustomerStatus
-import com.example.ui.components.StatusBadge
 import com.example.ui.theme.MyApplicationTheme
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -22,13 +21,9 @@ class GreetingScreenshotTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   @Test
-  fun status_badge_screenshot() {
-    composeTestRule.setContent {
-      MyApplicationTheme {
-        StatusBadge(status = CustomerStatus.ACTIVE)
-      }
-    }
+  fun greeting_screenshot() {
+    composeTestRule.setContent { MyApplicationTheme { Text("SmallStore") } }
 
-    composeTestRule.onRoot().captureRoboImage(filePath = "src/test/screenshots/status_badge.png")
+    composeTestRule.onRoot().captureRoboImage(filePath = "src/test/screenshots/greeting.png")
   }
 }

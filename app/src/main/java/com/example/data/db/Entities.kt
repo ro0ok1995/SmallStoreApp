@@ -1,98 +1,44 @@
 package com.example.data.db
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.example.core.model.CountryConstants
-import com.example.core.model.Customer
-import com.example.core.model.CustomerStatus
-import com.example.core.model.Money
-import com.example.core.model.Product
-import com.example.core.model.ProductStatus
-import com.example.core.model.Settings
-import com.example.core.model.Transaction
-import com.example.core.model.TransactionItem
-import com.example.core.model.TransactionStatus
-import com.example.core.model.TransactionType
+import com.example.model.CustomerAccount
+import com.example.model.NotificationItem
+import com.example.model.OperationStatus
+import com.example.model.ProductItem
+import com.example.model.SettlementType
+import com.example.model.StoreInfo
+import com.example.model.TransactionItem
+import com.example.model.typedOperationStatus
 
-@Entity(
-    tableName = "customers",
-    indices = [
-        Index(value = ["status"]),
-        Index(value = ["name"]),
-        Index(value = ["phone"])
-    ]
-)
+@Entity(tableName = "customers")
 data class CustomerEntity(
-    @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "id")
-    val id: Long = 0,
-
-    @ColumnInfo(name = "name")
-    val name: String,
-
-    @ColumnInfo(name = "phone")
-    val phone: String = "",
-
-    @ColumnInfo(name = "country_code")
-    val countryCode: String = CountryConstants.DEFAULT_COUNTRY_CODE,
-
-    @ColumnInfo(name = "address")
-    val address: String = "",
-
-    @ColumnInfo(name = "status")
-    val status: String = CustomerStatus.ACTIVE,
-
-    @ColumnInfo(name = "created_at")
-    val createdAt: Long = System.currentTimeMillis(),
-
-    @ColumnInfo(name = "updated_at")
-    val updatedAt: Long = System.currentTimeMillis(),
-
-    @ColumnInfo(name = "archived_at")
-    val archivedAt: Long? = null,
-
-    @ColumnInfo(name = "deleted_at")
-    val deletedAt: Long? = null
+    @PrimaryKey val id: String,
+    val customerName: String,
+    @Deprecated("Legacy stored balance column. Source of truth is persistent Customer Ledger.")
+    val balance: Double,
+    @Deprecated("Legacy stored debt column. Source of truth is persistent Customer Ledger.")
+    val totalDebt: Double,
+    val phone: String,
+    val lastTransactionDate: String,
+    val hasRecentActivity: Boolean,
+    val isArchived: Boolean = false,
+    val archivedDate: String? = null
 )
 
-@Entity(
-    tableName = "products",
-    indices = [
-        Index(value = ["status"]),
-        Index(value = ["name"])
-    ]
-)
+@Entity(tableName = "products")
 data class ProductEntity(
-    @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "id")
-    val id: Long = 0,
-
-    @ColumnInfo(name = "name")
+    @PrimaryKey val id: String,
     val name: String,
-
-    @ColumnInfo(name = "price")
-    val price: Long = 0L, // Integer minor units (350 = 3.50 ₪)
-
-    @ColumnInfo(name = "image_path")
-    val imagePath: String? = null,
-
-    @ColumnInfo(name = "status")
-    val status: String = ProductStatus.ACTIVE,
-
-    @ColumnInfo(name = "created_at")
-    val createdAt: Long = System.currentTimeMillis(),
-
-    @ColumnInfo(name = "updated_at")
-    val updatedAt: Long = System.currentTimeMillis(),
-
-    @ColumnInfo(name = "archived_at")
-    val archivedAt: Long? = null,
-
-    @ColumnInfo(name = "deleted_at")
-    val deletedAt: Long? = null
+    val price: Double,
+    val costPrice: Double = 0.0,
+    val category: String,
+    val unit: String,
+    val imageUri: String? = null,
+    val isArchived: Boolean = false,
+    val archivedDate: String? = null
 )
 
 @Entity(
@@ -101,246 +47,298 @@ data class ProductEntity(
         ForeignKey(
             entity = CustomerEntity::class,
             parentColumns = ["id"],
-            childColumns = ["customer_id"],
-            onDelete = ForeignKey.SET_NULL
+            childColumns = ["customerId"],
+            onDelete = ForeignKey.RESTRICT
         )
     ],
     indices = [
-        Index(value = ["customer_id"]),
-        Index(value = ["type"]),
-        Index(value = ["status"]),
-        Index(value = ["created_at"])
+        Index("customerId"),
+        Index(value = ["customerId", "transactionDate"])
     ]
 )
 data class TransactionEntity(
-    @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "id")
-    val id: Long = 0,
+    @PrimaryKey val id: String,
+    val title: String = "",
+    val customerNameSnapshot: String, // ONLY historical display name captured at the time of transaction
+    val activityType: String,
+    val amount: Double,
+    val isCredit: Boolean,
+    val date: String,
+    val relativeTime: String,
+    val notes: String = "",
+    val settlementType: String? = null,
+    val customerId: String? = null, // Relational customer identity (Source of Truth)
+    val isArchived: Boolean = false,
+    val archivedDate: String? = null,
+    @Deprecated(
+        message = "Legacy customerName column preserved for backward compatibility. Use customerNameSnapshot for presentation and customerId for identity.",
+        replaceWith = ReplaceWith("customerNameSnapshot")
+    )
+    val customerName: String = customerNameSnapshot,
+    val transactionDate: String = date,
+    val paidAmount: Double = 0.0,
+    val creditAmount: Double = 0.0,
+    val operationStatus: String = "ACTIVE"
+) {
+    @androidx.room.Ignore
+    @Deprecated("Legacy constructor for backward compatibility. Use customerNameSnapshot.")
+    constructor(
+        id: String,
+        title: String = "",
+        activityType: String = "",
+        amount: Double = 0.0,
+        isCredit: Boolean = false,
+        date: String = "",
+        relativeTime: String = "",
+        customerName: String = "",
+        notes: String = "",
+        settlementType: String? = null,
+        customerId: String? = null,
+        isArchived: Boolean = false,
+        archivedDate: String? = null
+    ) : this(
+        id = id,
+        title = title,
+        customerNameSnapshot = customerName,
+        activityType = activityType,
+        amount = amount,
+        isCredit = isCredit,
+        date = date,
+        relativeTime = relativeTime,
+        notes = notes,
+        settlementType = settlementType,
+        customerId = customerId,
+        isArchived = isArchived,
+        archivedDate = archivedDate,
+        customerName = customerName,
+        transactionDate = date,
+        paidAmount = 0.0,
+        creditAmount = 0.0
+    )
 
-    @ColumnInfo(name = "customer_id")
-    val customerId: Long? = null,
-
-    @ColumnInfo(name = "type")
-    val type: String, // credit_purchase, cash_purchase, payment
-
-    @ColumnInfo(name = "total_amount")
-    val totalAmount: Long, // Integer minor units
-
-    @ColumnInfo(name = "status")
-    val status: String = TransactionStatus.COMPLETED, // completed, cancelled
-
-    @ColumnInfo(name = "note")
-    val note: String = "",
-
-    @ColumnInfo(name = "created_at")
-    val createdAt: Long = System.currentTimeMillis(),
-
-    @ColumnInfo(name = "updated_at")
-    val updatedAt: Long = System.currentTimeMillis(),
-
-    @ColumnInfo(name = "cancelled_at")
-    val cancelledAt: Long? = null,
-
-    @ColumnInfo(name = "cancel_reason")
-    val cancelReason: String? = null
-)
+    @androidx.room.Ignore
+    constructor(
+        id: String,
+        title: String = "",
+        customerNameSnapshot: String = "",
+        activityType: String = "",
+        amount: Double = 0.0,
+        isCredit: Boolean = false,
+        date: String = "",
+        relativeTime: String = "",
+        notes: String = "",
+        settlementType: String? = null,
+        customerId: String? = null,
+        isArchived: Boolean = false,
+        archivedDate: String? = null,
+        customerName: String = customerNameSnapshot,
+        transactionDate: String = date
+    ) : this(
+        id = id,
+        title = title,
+        customerNameSnapshot = customerNameSnapshot,
+        activityType = activityType,
+        amount = amount,
+        isCredit = isCredit,
+        date = date,
+        relativeTime = relativeTime,
+        notes = notes,
+        settlementType = settlementType,
+        customerId = customerId,
+        isArchived = isArchived,
+        archivedDate = archivedDate,
+        customerName = customerName,
+        transactionDate = transactionDate,
+        paidAmount = 0.0,
+        creditAmount = 0.0
+    )
+}
 
 @Entity(
-    tableName = "transaction_items",
+    tableName = "transaction_item_lines",
     foreignKeys = [
         ForeignKey(
             entity = TransactionEntity::class,
             parentColumns = ["id"],
-            childColumns = ["transaction_id"],
+            childColumns = ["transactionId"],
             onDelete = ForeignKey.CASCADE
-        ),
-        ForeignKey(
-            entity = ProductEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["product_id"],
-            onDelete = ForeignKey.SET_NULL
         )
     ],
     indices = [
-        Index(value = ["transaction_id"]),
-        Index(value = ["product_id"])
+        Index("transactionId"),
+        Index("productId")
     ]
 )
-data class TransactionItemEntity(
-    @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "id")
-    val id: Long = 0,
-
-    @ColumnInfo(name = "transaction_id")
-    val transactionId: Long,
-
-    @ColumnInfo(name = "product_id")
-    val productId: Long? = null,
-
-    @ColumnInfo(name = "product_name_snapshot")
+data class TransactionItemLineEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val transactionId: String,
+    val productId: String? = null,
     val productNameSnapshot: String,
-
-    @ColumnInfo(name = "unit_price")
-    val unitPrice: Long, // Minor units
-
-    @ColumnInfo(name = "quantity")
-    val quantity: Double,
-
-    @ColumnInfo(name = "subtotal")
-    val subtotal: Long // Minor units
+    val quantity: Int,
+    val unitPrice: Double,
+    val costPrice: Double = 0.0,
+    val subtotal: Double
 )
 
-@Entity(tableName = "settings")
-data class SettingsEntity(
-    @PrimaryKey
-    @ColumnInfo(name = "id")
-    val id: Int = 1,
-
-    @ColumnInfo(name = "store_name")
-    val storeName: String = "حسابات المحل",
-
-    @ColumnInfo(name = "owner_name")
-    val ownerName: String = "",
-
-    @ColumnInfo(name = "phone")
-    val phone: String = "",
-
-    @ColumnInfo(name = "address")
-    val address: String = "",
-
-    @ColumnInfo(name = "language")
-    val language: String = "ar", // ar, en
-
-    @ColumnInfo(name = "theme")
-    val theme: String = "system", // light, dark, system
-
-    @ColumnInfo(name = "created_at")
-    val createdAt: Long = System.currentTimeMillis(),
-
-    @ColumnInfo(name = "updated_at")
-    val updatedAt: Long = System.currentTimeMillis()
+@Entity(tableName = "notifications")
+data class NotificationEntity(
+    @PrimaryKey val id: String,
+    val customerName: String,
+    val transactionType: String,
+    val amount: Double,
+    val timestamp: String,
+    val isPayment: Boolean,
+    val isRead: Boolean = false,
+    val transactionId: String? = null
 )
 
-// ==========================================
-// MAPPERS: Entity <-> Domain Model
-// ==========================================
+@Entity(tableName = "store_info")
+data class StoreInfoEntity(
+    @PrimaryKey val id: Int = 1,
+    val storeName: String,
+    val ownerName: String,
+    val phone: String,
+    val address: String,
+    val taxNumber: String,
+    val crNumber: String,
+    val isSaved: Boolean = false
+)
 
-fun CustomerEntity.toDomain(): Customer = Customer(
+// Extension converters between Room entities and domain models
+fun CustomerEntity.toModel(): CustomerAccount = CustomerAccount(
     id = id,
-    name = name,
+    customerName = customerName,
+    balance = balance,
+    totalDebt = totalDebt,
     phone = phone,
-    countryCode = countryCode,
-    address = address,
-    status = status,
-    createdAt = createdAt,
-    updatedAt = updatedAt,
-    archivedAt = archivedAt,
-    deletedAt = deletedAt
+    lastTransactionDate = lastTransactionDate,
+    hasRecentActivity = hasRecentActivity,
+    isArchived = isArchived,
+    archivedDate = archivedDate
 )
 
-fun Customer.toEntity(): CustomerEntity = CustomerEntity(
+fun CustomerAccount.toEntity(): CustomerEntity = CustomerEntity(
     id = id,
-    name = name,
+    customerName = customerName,
+    balance = balance,
+    totalDebt = totalDebt,
     phone = phone,
-    countryCode = countryCode,
-    address = address,
-    status = status,
-    createdAt = createdAt,
-    updatedAt = updatedAt,
-    archivedAt = archivedAt,
-    deletedAt = deletedAt
+    lastTransactionDate = lastTransactionDate,
+    hasRecentActivity = hasRecentActivity,
+    isArchived = isArchived,
+    archivedDate = archivedDate
 )
 
-fun ProductEntity.toDomain(): Product = Product(
+fun ProductEntity.toModel(): ProductItem = ProductItem(
     id = id,
     name = name,
-    price = Money.fromMinorUnits(price),
-    imagePath = imagePath,
-    status = status,
-    createdAt = createdAt,
-    updatedAt = updatedAt,
-    archivedAt = archivedAt,
-    deletedAt = deletedAt
+    price = price,
+    category = category,
+    unit = unit,
+    costPrice = costPrice,
+    imageUri = imageUri,
+    isArchived = isArchived,
+    archivedDate = archivedDate
 )
 
-fun Product.toEntity(): ProductEntity = ProductEntity(
+fun ProductItem.toEntity(): ProductEntity = ProductEntity(
     id = id,
     name = name,
-    price = price.minorUnits,
-    imagePath = imagePath,
-    status = status,
-    createdAt = createdAt,
-    updatedAt = updatedAt,
-    archivedAt = archivedAt,
-    deletedAt = deletedAt
+    price = price,
+    category = category,
+    unit = unit,
+    costPrice = costPrice,
+    imageUri = imageUri,
+    isArchived = isArchived,
+    archivedDate = archivedDate
 )
 
-fun TransactionEntity.toDomain(): Transaction = Transaction(
+fun TransactionEntity.toModel(): TransactionItem {
+    val snapshot = customerNameSnapshot.ifBlank { customerName }
+    val opStatus = if (operationStatus == "REVERSED") OperationStatus.REVERSED else OperationStatus.ACTIVE
+    return TransactionItem(
+        id = id,
+        title = title,
+        customerNameSnapshot = snapshot,
+        activityType = activityType,
+        amount = amount,
+        isCredit = isCredit,
+        date = date,
+        relativeTime = relativeTime,
+        notes = notes,
+        settlementType = settlementType?.let { runCatching { SettlementType.valueOf(it) }.getOrNull() },
+        customerId = customerId,
+        isArchived = isArchived,
+        archivedDate = archivedDate,
+        customerName = snapshot,
+        paidAmount = paidAmount,
+        creditAmount = creditAmount,
+        operationStatus = opStatus
+    )
+}
+
+fun TransactionItem.toEntity(): TransactionEntity {
+    val snapshot = customerNameSnapshot.ifBlank { customerName }
+    return TransactionEntity(
+        id = id,
+        title = title,
+        customerNameSnapshot = snapshot,
+        activityType = activityType,
+        amount = amount,
+        isCredit = isCredit,
+        date = date,
+        relativeTime = relativeTime,
+        notes = notes,
+        settlementType = settlementType?.name,
+        customerId = customerId,
+        isArchived = isArchived,
+        archivedDate = archivedDate,
+        customerName = snapshot,
+        transactionDate = date,
+        paidAmount = paidAmount,
+        creditAmount = creditAmount,
+        operationStatus = (operationStatus ?: typedOperationStatus).name
+    )
+}
+
+fun NotificationEntity.toModel(): NotificationItem = NotificationItem(
     id = id,
-    customerId = customerId,
-    type = type,
-    totalAmount = Money.fromMinorUnits(totalAmount),
-    status = status,
-    note = note,
-    createdAt = createdAt,
-    updatedAt = updatedAt,
-    cancelledAt = cancelledAt,
-    cancelReason = cancelReason
+    customerName = customerName,
+    transactionType = transactionType,
+    amount = amount,
+    timestamp = timestamp,
+    isPayment = isPayment,
+    isRead = isRead,
+    transactionId = transactionId
 )
 
-fun Transaction.toEntity(): TransactionEntity = TransactionEntity(
+fun NotificationItem.toEntity(): NotificationEntity = NotificationEntity(
     id = id,
-    customerId = customerId,
-    type = type,
-    totalAmount = totalAmount.minorUnits,
-    status = status,
-    note = note,
-    createdAt = createdAt,
-    updatedAt = updatedAt,
-    cancelledAt = cancelledAt,
-    cancelReason = cancelReason
+    customerName = customerName,
+    transactionType = transactionType,
+    amount = amount,
+    timestamp = timestamp,
+    isPayment = isPayment,
+    isRead = isRead,
+    transactionId = transactionId
 )
 
-fun TransactionItemEntity.toDomain(): TransactionItem = TransactionItem(
-    id = id,
-    transactionId = transactionId,
-    productId = productId,
-    productNameSnapshot = productNameSnapshot,
-    unitPrice = Money.fromMinorUnits(unitPrice),
-    quantity = quantity,
-    subtotal = Money.fromMinorUnits(subtotal)
-)
-
-fun TransactionItem.toEntity(): TransactionItemEntity = TransactionItemEntity(
-    id = id,
-    transactionId = transactionId,
-    productId = productId,
-    productNameSnapshot = productNameSnapshot,
-    unitPrice = unitPrice.minorUnits,
-    quantity = quantity,
-    subtotal = subtotal.minorUnits
-)
-
-fun SettingsEntity.toDomain(): Settings = Settings(
-    id = id,
+fun StoreInfoEntity.toModel(): StoreInfo = StoreInfo(
     storeName = storeName,
     ownerName = ownerName,
     phone = phone,
     address = address,
-    language = language,
-    theme = theme,
-    createdAt = createdAt,
-    updatedAt = updatedAt
+    taxNumber = taxNumber,
+    crNumber = crNumber
 )
 
-fun Settings.toEntity(): SettingsEntity = SettingsEntity(
-    id = id,
+fun StoreInfo.toEntity(isSaved: Boolean = false): StoreInfoEntity = StoreInfoEntity(
+    id = 1,
     storeName = storeName,
     ownerName = ownerName,
     phone = phone,
     address = address,
-    language = language,
-    theme = theme,
-    createdAt = createdAt,
-    updatedAt = updatedAt
+    taxNumber = taxNumber,
+    crNumber = crNumber,
+    isSaved = isSaved
 )
